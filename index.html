@@ -1,0 +1,1978 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1a472a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="البطولة">
+<title>البطولة 🏆</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+
+<link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoi2KfZhNio2LfZitin2Kkg8J+PkiIsInNob3J0X25hbWUiOiLYp9mE2KjYt9mI2KciLCJzdGFydF91cmwiOiIuLyIsImRpc3BsYXkiOiJzdGFuZGFsb25lIiwiYmFja2dyb3VuZF9jb2xvciI6IiMwZjFmMGYiLCJ0aGVtZV9jb2xvciI6IiMxYTQ3MmEiLCJpY29ucyI6W3sic3JjIjoiZGF0YTppbWFnZS9zdmcreG1sLCUzQ3N2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScxOTInIGhlaWdodD0nMTkyJyB2aWV3Qm94PScwIDAgMTkyIDE5MiclM0UlM0NyZWN0IHdpZHRoPScxOTInIGhlaWdodD0nMTkyJyByeD0nMzInIGZpbGw9JyUyMzFhNDcyYScvJTNFJTNDdGV4dCB4PSc5NicgeT0nMTI4JyBmb250LXNpemU9JzEwMCcgdGV4dC1hbmNob3I9J21pZGRsZSclM0XwjZCTJTNDL3RleHQlM0UlM0Mvc3ZnJTNFIiwic2l6ZXMiOiIxOTJ4MTkyIiwidHlwZSI6ImltYWdlL3N2Zyt4bWwifV19">
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+:root {
+  --bg: #0f1f0f;
+  --surface: #1e3a1e;
+  --surface2: #243d24;
+  --green: #1a472a;
+  --green-light: #2d6a4f;
+  --green-bright: #52b788;
+  --gold: #c9a84c;
+  --gold-light: #e8c96b;
+  --text: #e8f5e9;
+  --text-dim: #a5c8a5;
+  --red: #e63946;
+  --yellow: #f4a261;
+  --radius: 14px;
+  --nav-h: 64px;
+}
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Tajawal', sans-serif;
+  font-size: 16px;
+  overflow: hidden;
+}
+
+/* ═══ LOADING ═══ */
+#loading-screen {
+  position: fixed; inset: 0;
+  background: var(--bg);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  z-index: 9999;
+  gap: 20px;
+}
+.spinner {
+  width: 50px; height: 50px;
+  border: 4px solid var(--surface);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ═══ OFFLINE BANNER ═══ */
+#offline-banner {
+  position: fixed; top: 0; left: 0; right: 0;
+  background: var(--red);
+  color: #fff;
+  text-align: center;
+  padding: 8px;
+  font-weight: 700;
+  font-size: 14px;
+  z-index: 8888;
+  transform: translateY(-100%);
+  transition: transform 0.3s;
+}
+#offline-banner.show { transform: translateY(0); }
+
+/* ═══ LOGIN SCREEN ═══ */
+#login-screen {
+  position: fixed; inset: 0;
+  background: var(--bg);
+  display: flex; flex-direction: column;
+  align-items: center;
+  padding: 40px 20px;
+  overflow-y: auto;
+  z-index: 999;
+}
+.login-trophy {
+  font-size: 72px;
+  margin-bottom: 8px;
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.08)} }
+.login-title {
+  font-size: 32px;
+  font-weight: 900;
+  color: var(--gold);
+  margin-bottom: 4px;
+}
+.login-sub {
+  color: var(--text-dim);
+  font-size: 15px;
+  margin-bottom: 32px;
+}
+.login-section-title {
+  width: 100%; max-width: 400px;
+  font-size: 14px;
+  color: var(--text-dim);
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+.name-list {
+  width: 100%; max-width: 400px;
+  display: flex; flex-direction: column;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+.name-btn {
+  background: var(--surface);
+  border: 2px solid var(--green-light);
+  color: var(--text);
+  font-family: 'Tajawal', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  padding: 14px 20px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: right;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.name-btn:hover, .name-btn:active {
+  background: var(--green-light);
+  border-color: var(--gold);
+  transform: scale(0.98);
+}
+.add-name-section {
+  width: 100%; max-width: 400px;
+}
+.add-name-row {
+  display: flex; gap: 8px;
+}
+.text-input {
+  flex: 1;
+  background: var(--surface);
+  border: 2px solid var(--green-light);
+  color: var(--text);
+  font-family: 'Tajawal', sans-serif;
+  font-size: 16px;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  outline: none;
+  text-align: right;
+}
+.text-input:focus { border-color: var(--gold); }
+.btn-primary {
+  background: var(--gold);
+  color: #1a1a1a;
+  border: none;
+  font-family: 'Tajawal', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  padding: 12px 18px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.btn-primary:active { transform: scale(0.96); opacity: 0.9; }
+.btn-danger {
+  background: var(--red);
+  color: #fff;
+  border: none;
+  font-family: 'Tajawal', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  padding: 10px 16px;
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+/* ═══ MAIN APP ═══ */
+#app {
+  display: none;
+  flex-direction: column;
+  height: 100%;
+}
+#app.visible { display: flex; }
+
+/* ═══ TOP BAR ═══ */
+.top-bar {
+  background: var(--surface);
+  padding: 12px 16px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--green-light);
+  flex-shrink: 0;
+}
+.top-bar-title {
+  font-size: 20px; font-weight: 800; color: var(--gold);
+}
+.top-bar-user {
+  font-size: 14px; color: var(--text-dim);
+  display: flex; align-items: center; gap: 6px;
+}
+.admin-badge {
+  background: var(--gold);
+  color: #1a1a1a;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 20px;
+}
+
+/* ═══ CONTENT ═══ */
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  padding-bottom: calc(var(--nav-h) + 16px);
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ═══ BOTTOM NAV ═══ */
+.bottom-nav {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: var(--nav-h);
+  background: var(--surface);
+  border-top: 1px solid var(--green-light);
+  display: flex;
+  z-index: 100;
+}
+.nav-item {
+  flex: 1;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 3px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: var(--text-dim);
+  font-size: 10px;
+  font-weight: 600;
+  padding: 6px 0;
+  border: none;
+  background: none;
+  font-family: 'Tajawal', sans-serif;
+}
+.nav-item .nav-icon { font-size: 22px; line-height: 1; }
+.nav-item.active { color: var(--gold); }
+.nav-item.active .nav-icon { transform: scale(1.15); }
+
+/* ═══ TABS ═══ */
+.tab { display: none; }
+.tab.active { display: block; }
+
+/* ═══ CARDS ═══ */
+.card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 12px;
+  border: 1px solid var(--green-light);
+}
+.card-title {
+  font-size: 13px;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ═══ TODAY TAB ═══ */
+.today-header {
+  text-align: center;
+  margin-bottom: 16px;
+}
+.today-date {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--gold);
+}
+.today-day {
+  font-size: 13px;
+  color: var(--text-dim);
+}
+.points-total-card {
+  background: linear-gradient(135deg, var(--green) 0%, var(--green-light) 100%);
+  border-radius: var(--radius);
+  padding: 20px;
+  text-align: center;
+  margin-bottom: 16px;
+  border: 2px solid var(--gold);
+  position: relative;
+  overflow: hidden;
+}
+.points-total-card::before {
+  content: '🏆';
+  position: absolute;
+  font-size: 80px;
+  opacity: 0.08;
+  right: -10px;
+  top: -10px;
+}
+.points-big {
+  font-size: 52px;
+  font-weight: 900;
+  color: var(--gold-light);
+  line-height: 1;
+  transition: all 0.3s;
+}
+.points-label { font-size: 14px; color: var(--text-dim); margin-top: 4px; }
+
+.progress-bar-wrap {
+  background: rgba(0,0,0,0.3);
+  border-radius: 10px;
+  height: 10px;
+  overflow: hidden;
+  margin-top: 12px;
+}
+.progress-bar-fill {
+  height: 100%;
+  border-radius: 10px;
+  background: linear-gradient(90deg, var(--gold), var(--gold-light));
+  transition: width 0.4s ease;
+}
+
+/* ═══ HABIT CARDS ═══ */
+.habit-card {
+  background: var(--surface);
+  border: 1px solid var(--green-light);
+  border-radius: var(--radius);
+  margin-bottom: 10px;
+  overflow: hidden;
+  transition: border-color 0.2s, background 0.2s;
+}
+.habit-card.done { border-color: var(--green-bright); background: rgba(82,183,136,0.07); }
+.habit-card.nope { border-color: rgba(230,57,70,0.5); background: rgba(230,57,70,0.05); }
+.habit-main {
+  display: flex;
+  align-items: center;
+  padding: 14px 16px;
+  gap: 12px;
+  user-select: none;
+}
+.habit-main.expandable { cursor: pointer; }
+.habit-emoji { font-size: 26px; flex-shrink: 0; }
+.habit-info { flex: 1; min-width: 0; }
+.habit-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.3;
+}
+.habit-pts {
+  font-size: 12px;
+  color: var(--gold);
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+/* yes/no buttons */
+.yesno-btns { display: flex; gap: 6px; flex-shrink: 0; }
+.yesno-btn {
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: 2px solid;
+  font-family: 'Tajawal', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: transparent;
+  white-space: nowrap;
+}
+.yesno-btn:active { transform: scale(0.93); }
+.yesno-btn.yes-btn { border-color: var(--green-bright); color: var(--green-bright); }
+.yesno-btn.yes-btn.active { background: var(--green-bright); color: #fff; }
+.yesno-btn.no-btn { border-color: var(--red); color: var(--red); }
+.yesno-btn.no-btn.active { background: var(--red); color: #fff; }
+
+/* prayers expand */
+.prayers-expand {
+  padding: 0 14px 12px;
+  display: none;
+  flex-direction: column;
+  gap: 6px;
+}
+.prayers-expand.open { display: flex; }
+.prayer-yesno-row {
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--surface2);
+  border-radius: 10px;
+  padding: 8px 12px;
+}
+.prayer-name { font-size: 14px; font-weight: 700; }
+
+/* bonus card */
+.bonus-card {
+  background: linear-gradient(135deg, #2d2b0a 0%, #1e1c08 100%);
+  border: 2px solid var(--gold);
+  border-radius: var(--radius);
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+.bonus-badge {
+  display: inline-flex; align-items: center; gap: 3px;
+  background: var(--gold);
+  color: #1a1a1a;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 20px;
+  margin-top: 4px;
+}
+
+/* ═══ TOAST ═══ */
+.toast {
+  position: fixed;
+  bottom: calc(var(--nav-h) + 16px);
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--green-bright);
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 30px;
+  font-weight: 700;
+  font-size: 14px;
+  opacity: 0;
+  transition: all 0.3s;
+  z-index: 5000;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ═══ CALENDAR TAB ═══ */
+.select-row {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 16px;
+}
+.select-row label { font-size: 14px; color: var(--text-dim); font-weight: 600; white-space: nowrap; }
+.styled-select {
+  flex: 1;
+  background: var(--surface);
+  border: 1.5px solid var(--green-light);
+  color: var(--text);
+  font-family: 'Tajawal', sans-serif;
+  font-size: 15px;
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  outline: none;
+  direction: rtl;
+}
+.styled-select:focus { border-color: var(--gold); }
+
+.cal-row {
+  background: var(--surface);
+  border: 1px solid var(--green-light);
+  border-radius: var(--radius);
+  margin-bottom: 8px;
+  overflow: hidden;
+  cursor: pointer;
+}
+.cal-row-header {
+  display: flex; align-items: center;
+  padding: 12px 14px;
+  gap: 10px;
+}
+.cal-date { font-size: 13px; color: var(--text-dim); font-weight: 600; min-width: 70px; }
+.cal-bar-wrap { flex: 1; height: 8px; background: rgba(0,0,0,0.3); border-radius: 6px; overflow: hidden; }
+.cal-bar { height: 100%; border-radius: 6px; transition: width 0.5s ease; }
+.cal-pts { font-size: 14px; font-weight: 700; min-width: 44px; text-align: left; }
+.cal-expand {
+  padding: 0 14px 12px;
+  display: none;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.cal-expand.open { display: flex; }
+.cal-habit-chip {
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-weight: 600;
+}
+.cal-habit-chip.done { background: var(--green); color: #fff; }
+.cal-habit-chip.not { background: var(--surface2); color: var(--text-dim); }
+
+/* ═══ LEADERBOARD TAB ═══ */
+.day-counter {
+  background: linear-gradient(135deg, var(--green), var(--green-light));
+  border-radius: var(--radius);
+  padding: 16px;
+  text-align: center;
+  margin-bottom: 16px;
+  border: 1px solid var(--gold);
+}
+.day-counter-num { font-size: 36px; font-weight: 900; color: var(--gold); }
+.day-counter-label { font-size: 14px; color: var(--text-dim); }
+
+.leader-item {
+  background: var(--surface);
+  border: 1px solid var(--green-light);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  display: flex; align-items: center; gap: 12px;
+  transition: all 0.2s;
+}
+.leader-item.me {
+  border-color: var(--gold);
+  background: linear-gradient(135deg, var(--green) 0%, var(--surface) 100%);
+  box-shadow: 0 0 0 2px rgba(201,168,76,0.3);
+}
+.leader-rank {
+  font-size: 22px; font-weight: 900; min-width: 36px; text-align: center;
+}
+.leader-info { flex: 1; }
+.leader-name { font-size: 16px; font-weight: 800; }
+.leader-meta { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+.leader-pts { text-align: left; }
+.leader-pts-big { font-size: 22px; font-weight: 900; color: var(--gold); }
+.leader-pts-today { font-size: 11px; color: var(--text-dim); }
+
+/* ═══ STATS TAB ═══ */
+.stats-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--green-light);
+  border-radius: var(--radius);
+  padding: 14px;
+  text-align: center;
+}
+.stat-val { font-size: 28px; font-weight: 900; color: var(--gold); }
+.stat-label { font-size: 11px; color: var(--text-dim); margin-top: 4px; font-weight: 600; }
+
+.habit-stat-row {
+  margin-bottom: 12px;
+}
+.habit-stat-header {
+  display: flex; justify-content: space-between;
+  font-size: 13px; margin-bottom: 5px;
+  font-weight: 600;
+}
+.habit-stat-pct { color: var(--gold); }
+.habit-stat-bar { height: 8px; background: rgba(0,0,0,0.3); border-radius: 6px; overflow: hidden; }
+.habit-stat-fill { height: 100%; border-radius: 6px; background: linear-gradient(90deg, var(--green-bright), var(--gold)); transition: width 0.6s ease; }
+
+.motivational {
+  background: linear-gradient(135deg, var(--green), var(--green-light));
+  border: 1px solid var(--gold);
+  border-radius: var(--radius);
+  padding: 18px;
+  text-align: center;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--gold-light);
+  margin-bottom: 16px;
+}
+
+/* ═══ ADMIN PANEL ═══ */
+#admin-panel {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.8);
+  z-index: 2000;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+#admin-panel.open { display: flex; }
+.admin-card {
+  background: var(--surface);
+  border: 2px solid var(--gold);
+  border-radius: var(--radius);
+  padding: 24px;
+  width: 100%; max-width: 400px;
+  max-height: 85vh;
+  overflow-y: auto;
+}
+.admin-title {
+  font-size: 20px; font-weight: 900; color: var(--gold);
+  margin-bottom: 20px; text-align: center;
+}
+.admin-section { margin-bottom: 20px; }
+.admin-section-title { font-size: 13px; color: var(--text-dim); font-weight: 600; margin-bottom: 10px; }
+.admin-btn {
+  width: 100%;
+  padding: 13px;
+  border-radius: var(--radius);
+  border: none;
+  font-family: 'Tajawal', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-bottom: 8px;
+  transition: all 0.2s;
+}
+.admin-btn:active { transform: scale(0.98); }
+.admin-btn-warn { background: var(--yellow); color: #1a1a1a; }
+.admin-btn-danger { background: var(--red); color: #fff; }
+.admin-btn-close { background: var(--green-light); color: var(--text); }
+.admin-input {
+  width: 100%;
+  background: var(--surface2);
+  border: 1.5px solid var(--green-light);
+  color: var(--text);
+  font-family: 'Tajawal', sans-serif;
+  font-size: 15px;
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  outline: none;
+  margin-bottom: 8px;
+  direction: ltr;
+}
+.remove-participant-list { display: flex; flex-direction: column; gap: 6px; }
+.remove-participant-item {
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--surface2);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+.remove-participant-item span { font-weight: 600; }
+.btn-remove-small {
+  background: var(--red);
+  color: #fff;
+  border: none;
+  padding: 5px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: 'Tajawal', sans-serif;
+}
+
+/* ═══ PIN OVERLAYS ═══ */
+#pin-screen, #pin-setup-modal, #admin-reset-pin-modal {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.9);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+  padding: 20px;
+}
+#pin-screen.open, #pin-setup-modal.open, #admin-reset-pin-modal.open { display: flex; }
+
+.pin-card {
+  background: var(--surface);
+  border: 2px solid var(--green-light);
+  border-radius: var(--radius);
+  padding: 28px 20px 22px;
+  width: 100%;
+  max-width: 340px;
+  text-align: center;
+  animation: slideUp 0.25s ease;
+}
+@keyframes slideUp { from{transform:translateY(30px);opacity:0} to{transform:translateY(0);opacity:1} }
+
+.pin-icon { font-size: 42px; margin-bottom: 8px; }
+.pin-user-name { font-size: 22px; font-weight: 900; color: var(--gold); margin-bottom: 4px; }
+.pin-subtitle { font-size: 14px; color: var(--text-dim); margin-bottom: 22px; }
+.pin-field-label {
+  font-size: 13px; color: var(--text-dim);
+  font-weight: 700; margin-bottom: 10px;
+  text-align: center;
+}
+
+.pin-boxes {
+  display: flex; gap: 10px;
+  justify-content: center;
+  margin-bottom: 14px;
+  direction: ltr;
+}
+.pin-box {
+  width: 56px; height: 64px;
+  background: var(--bg);
+  border: 2.5px solid var(--green-light);
+  border-radius: 12px;
+  color: var(--gold-light);
+  font-size: 28px;
+  text-align: center;
+  font-family: monospace;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  caret-color: transparent;
+}
+.pin-box:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(201,168,76,0.3);
+  background: var(--surface2);
+}
+.pin-box.filled { border-color: var(--green-bright); }
+.pin-box:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.pin-error {
+  min-height: 20px; font-size: 14px;
+  font-weight: 700; color: var(--red);
+  margin-bottom: 10px; text-align: center;
+}
+.pin-countdown {
+  font-size: 32px; font-weight: 900;
+  color: var(--red); margin-bottom: 10px;
+  min-height: 36px;
+}
+.pin-actions { display: flex; gap: 10px; margin-top: 6px; }
+.pin-actions > * { flex: 1; }
+.pin-clear-btn {
+  background: none;
+  border: 1.5px solid var(--green-light);
+  color: var(--text-dim);
+  font-family: 'Tajawal', sans-serif;
+  font-size: 13px; font-weight: 700;
+  padding: 8px;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-bottom: 10px;
+  width: 100%;
+  transition: all 0.2s;
+}
+.pin-clear-btn:active { background: var(--surface2); }
+
+/* ═══ WHATSAPP BUTTON ═══ */
+.wa-share-btn {
+  display: flex; align-items: center; justify-content: center;
+  gap: 10px;
+  width: 100%;
+  margin-top: 16px;
+  padding: 14px;
+  background: #25D366;
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  font-family: 'Tajawal', sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 15px rgba(37,211,102,0.3);
+}
+.wa-share-btn:active { transform: scale(0.97); opacity: 0.9; }
+
+/* ═══ SCROLL HELPERS ═══ */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--green-light); border-radius: 4px; }
+
+/* ═══ POINT FLASH ═══ */
+@keyframes pointFlash {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.3); color: var(--gold-light); }
+  100% { transform: scale(1); }
+}
+.flash { animation: pointFlash 0.4s ease; }
+
+/* ═══ EMPTY STATE ═══ */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-dim);
+}
+.empty-state-icon { font-size: 48px; margin-bottom: 12px; }
+</style>
+</head>
+<body>
+
+<!-- Loading -->
+<div id="loading-screen">
+  <div class="login-trophy">🏆</div>
+  <div class="spinner"></div>
+  <div style="color: var(--text-dim); font-size: 14px;">جاري التحميل...</div>
+</div>
+
+<!-- Offline Banner -->
+<div id="offline-banner">📵 أنت غير متصل بالإنترنت</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Login Screen -->
+<div id="login-screen" style="display:none">
+  <div class="login-trophy">🏆</div>
+  <div class="login-title">البطولة</div>
+  <div class="login-sub">تحدي التطوير الذاتي لمدة ٣٠ يوماً</div>
+  <div class="login-section-title">اختر اسمك:</div>
+  <div class="name-list" id="name-list">
+    <div class="empty-state" style="padding:20px">
+      <div style="font-size:14px;color:var(--text-dim)">لا يوجد مشاركون بعد</div>
+    </div>
+  </div>
+  <div class="add-name-section">
+    <div class="login-section-title">إضافة اسم جديد:</div>
+    <div class="add-name-row">
+      <input class="text-input" id="new-name-input" type="text" placeholder="أدخل اسمك..." onkeydown="if(event.key==='Enter')window.addNewParticipant()">
+      <button class="btn-primary" onclick="window.addNewParticipant()">إضافة</button>
+    </div>
+  </div>
+</div>
+
+<!-- PIN Login Screen -->
+<div id="pin-screen">
+  <div class="pin-card">
+    <div class="pin-icon">🔐</div>
+    <div class="pin-user-name" id="pin-screen-name"></div>
+    <div class="pin-subtitle">أدخل رمز الـ PIN</div>
+    <div class="pin-boxes" id="login-pin-boxes">
+      <input class="pin-box" type="password" inputmode="numeric" maxlength="1">
+      <input class="pin-box" type="password" inputmode="numeric" maxlength="1">
+      <input class="pin-box" type="password" inputmode="numeric" maxlength="1">
+      <input class="pin-box" type="password" inputmode="numeric" maxlength="1">
+    </div>
+    <button class="pin-clear-btn" onclick="window.clearPinEntry('login-pin-boxes')">مسح ✕</button>
+    <div class="pin-error" id="pin-error"></div>
+    <div class="pin-countdown" id="pin-countdown"></div>
+    <div class="pin-actions">
+      <button class="btn-primary" id="pin-submit-btn" onclick="window.submitPin()">تأكيد</button>
+      <button class="admin-btn admin-btn-close" onclick="window.cancelPin()">رجوع</button>
+    </div>
+  </div>
+</div>
+
+<!-- PIN Setup Modal (new participant) -->
+<div id="pin-setup-modal">
+  <div class="pin-card">
+    <div class="pin-icon">🔑</div>
+    <div class="pin-subtitle">إنشاء رمز PIN لـ</div>
+    <div class="pin-user-name" id="setup-for-name"></div>
+    <div class="pin-field-label">رمز PIN الجديد:</div>
+    <div class="pin-boxes" id="setup-pin-boxes">
+      <input class="pin-box" type="password" inputmode="numeric" maxlength="1">
+      <input class="pin-box" type="password" inputmode="numeric" maxlength="1">
+      <input class="pin-box" type="password" inputmode="numeric" maxlength="1">
+      <input class="pin-box" type="password" inputmode="numeric" maxlength="1">
+    </div>
+    <div class="pin-field-label">تأكيد PIN:</div>
+    <div class="pin-boxes" id="setup-confirm-boxes">
+      <input class="pin-box" type="password" inputmode="numeric" maxlength="1">
+      <input class="pin-box" type="password" inputmode="numeric" maxlength="1">
+      <input class="pin-box" type="password" inputmode="numeric" maxlength="1">
+      <input class="pin-box" type="password" inputmode="numeric" maxlength="1">
+    </div>
+    <div class="pin-error" id="setup-error"></div>
+    <div class="pin-actions">
+      <button class="btn-primary" onclick="window.confirmSetupPin()">حفظ</button>
+      <button class="admin-btn admin-btn-close" onclick="window.cancelSetupPin()">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- Admin Reset PIN Modal -->
+<div id="admin-reset-pin-modal">
+  <div class="pin-card">
+    <div class="pin-icon">🔧</div>
+    <div class="pin-subtitle">تعيين PIN جديد لـ</div>
+    <div class="pin-user-name" id="admin-reset-pin-name"></div>
+    <div class="pin-boxes" id="admin-reset-pin-boxes">
+      <input class="pin-box" type="password" inputmode="numeric" maxlength="1">
+      <input class="pin-box" type="password" inputmode="numeric" maxlength="1">
+      <input class="pin-box" type="password" inputmode="numeric" maxlength="1">
+      <input class="pin-box" type="password" inputmode="numeric" maxlength="1">
+    </div>
+    <div class="pin-error" id="admin-reset-pin-error"></div>
+    <div class="pin-actions">
+      <button class="btn-primary" onclick="window.confirmAdminResetPin()">حفظ</button>
+      <button class="admin-btn admin-btn-close" onclick="window.cancelAdminResetPin()">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- Main App -->
+<div id="app">
+  <div class="top-bar">
+    <div class="top-bar-title">البطولة 🏆</div>
+    <div class="top-bar-user">
+      <span id="user-name-display"></span>
+      <span class="admin-badge" id="admin-badge" style="display:none" onclick="window.openAdmin()">⚙️ إدارة</span>
+      <span style="cursor:pointer;font-size:13px;color:var(--text-dim)" onclick="window.logout()">تغيير</span>
+    </div>
+  </div>
+
+  <div class="content">
+    <!-- TODAY TAB -->
+    <div class="tab active" id="tab-today">
+      <div class="today-header">
+        <div class="today-date" id="today-date-display"></div>
+        <div class="today-day" id="challenge-day-display"></div>
+      </div>
+      <div class="points-total-card">
+        <div class="points-big" id="points-big">0</div>
+        <div class="points-label" id="points-label">نقطة من 100</div>
+        <div id="points-bonus-line" style="display:none;margin-top:4px;font-size:15px;font-weight:800;color:var(--gold-light)"></div>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar-fill" id="main-progress" style="width:0%"></div>
+        </div>
+      </div>
+      <div id="habits-list"></div>
+    </div>
+
+    <!-- CALENDAR TAB -->
+    <div class="tab" id="tab-calendar">
+      <div class="select-row">
+        <label>المشارك:</label>
+        <select class="styled-select" id="cal-participant-select" onchange="window.renderCalendar()"></select>
+      </div>
+      <div id="calendar-rows"></div>
+    </div>
+
+    <!-- LEADERBOARD TAB -->
+    <div class="tab" id="tab-leaderboard">
+      <div class="day-counter">
+        <div class="day-counter-num" id="lb-day-num">-</div>
+        <div class="day-counter-label">يوم من 30</div>
+      </div>
+      <div id="leaderboard-list"></div>
+      <button class="wa-share-btn" onclick="window.shareLeaderboard()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+        </svg>
+        شارك على واتساب 📲
+      </button>
+    </div>
+
+    <!-- STATS TAB -->
+    <div class="tab" id="tab-stats">
+      <div class="select-row">
+        <label>المشارك:</label>
+        <select class="styled-select" id="stats-participant-select" onchange="window.renderStats()"></select>
+      </div>
+      <div id="stats-content"></div>
+    </div>
+  </div>
+
+  <nav class="bottom-nav">
+    <button class="nav-item active" onclick="window.switchTab('today',this)">
+      <span class="nav-icon">🏠</span>
+      <span>اليوم</span>
+    </button>
+    <button class="nav-item" onclick="window.switchTab('calendar',this)">
+      <span class="nav-icon">📅</span>
+      <span>التقويم</span>
+    </button>
+    <button class="nav-item" onclick="window.switchTab('leaderboard',this)">
+      <span class="nav-icon">🏆</span>
+      <span>المتصدرون</span>
+    </button>
+    <button class="nav-item" onclick="window.switchTab('stats',this)">
+      <span class="nav-icon">📊</span>
+      <span>إحصائياتي</span>
+    </button>
+  </nav>
+</div>
+
+<!-- Admin Panel -->
+<div id="admin-panel">
+  <div class="admin-card">
+    <div class="admin-title">⚙️ لوحة الإدارة</div>
+    <div class="admin-section">
+      <div class="admin-section-title">تاريخ بدء التحدي:</div>
+      <input class="admin-input" type="date" id="admin-start-date">
+      <button class="admin-btn admin-btn-warn" onclick="window.adminSetStartDate()">💾 تحديث تاريخ البداية</button>
+    </div>
+    <div class="admin-section">
+      <div class="admin-section-title">المشاركون:</div>
+      <div class="remove-participant-list" id="admin-participants-list"></div>
+    </div>
+    <div class="admin-section">
+      <button class="admin-btn admin-btn-danger" onclick="window.adminResetChallenge()">🗑️ إعادة تعيين كل البيانات</button>
+    </div>
+    <button class="admin-btn admin-btn-close" onclick="window.closeAdmin()">إغلاق</button>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<script>
+// ═══ FIREBASE CONFIG ═══
+const firebaseConfig = {
+  apiKey: "AIzaSyBhWCFgZvKz2qlpIInQP4HAbVMBFSzQvvU",
+  authDomain: "butula-app.firebaseapp.com",
+  databaseURL: "https://butula-app-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "butula-app",
+  storageBucket: "butula-app.firebasestorage.app",
+  messagingSenderId: "412573800347",
+  appId: "1:412573800347:web:1a6ac6ffd0b94a1abd733e"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+// ═══ CONSTANTS ═══
+const ADMIN_NAME = 'يوسف';
+const PRAYERS = ['الفجر','الظهر','العصر','المغرب','العشاء'];
+const HABITS = [
+  { key: 'prayers',       name: 'الصلوات الخمس الفرائض',                   emoji: '🕌', pts: 10, type: 'prayers' },
+  { key: 'quran',         name: 'ورد القرآن الكريم',                        emoji: '📖', pts: 10, type: 'bool' },
+  { key: 'athkarMorning', name: 'أذكار الصباح',                             emoji: '🌅', pts: 5,  type: 'bool' },
+  { key: 'athkarEvening', name: 'أذكار المساء والنوم',                      emoji: '🌜', pts: 5,  type: 'bool' },
+  { key: 'work',          name: 'المذاكرة أو العمل أو الأعمال المفروضة',    emoji: '💼', pts: 10, type: 'bool' },
+  { key: 'reading',       name: 'قراءة كتاب (٥ دقائق على الأقل)',            emoji: '📚', pts: 10, type: 'bool' },
+  { key: 'gratitude',     name: 'كتابة امتنان واحد على الأقل',              emoji: '🙏', pts: 10, type: 'bool' },
+  { key: 'exercise',      name: 'ممارسة الرياضة (٥ دقائق على الأقل)',       emoji: '🏃', pts: 10, type: 'bool' },
+  { key: 'qiyam',         name: 'قيام الليل (ركعتان + ركعة الوتر)',        emoji: '🌙', pts: 10, type: 'bool' },
+  { key: 'journal',       name: 'كتابة اليوميات والجرد والتدوين',           emoji: '📝', pts: 10, type: 'bool' },
+  { key: 'noScrolling',   name: 'الامتناع عن التصفح العشوائي للإنترنت',    emoji: '📵', pts: 10, type: 'bool' },
+];
+const BONUS_HABIT = { key: 'noPorn', name: 'الامتناع عن المحتوى الإباحي', emoji: '🛡️', pts: 10 };
+
+// ═══ STATE ═══
+let currentUser = null;
+let challengeConfig = { startDate: null, durationDays: 30 };
+let allLogs = {};
+let allParticipants = [];
+let allParticipantData = {};
+let todayLog = {};
+let lbUnsubscribe = null;
+
+// PIN state
+let pinPendingName = null;
+let pinAttempts = 0;
+let pinLockUntil = 0;
+
+// ═══ UTILS ═══
+function toDateStr(d) {
+  return d.toISOString().split('T')[0];
+}
+function todayStr() { return toDateStr(new Date()); }
+function getToday() { return new Date(); }
+function pad2(n) { return String(n).padStart(2,'0'); }
+
+function toArabicDate(dateStr) {
+  const d = new Date(dateStr + 'T12:00:00');
+  return d.toLocaleDateString('ar-SA', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+}
+function shortArabicDate(dateStr) {
+  const d = new Date(dateStr + 'T12:00:00');
+  return d.toLocaleDateString('ar-SA', { month:'short', day:'numeric' });
+}
+
+function getChallengeDay() {
+  if (!challengeConfig.startDate) return 1;
+  const start = new Date(challengeConfig.startDate + 'T00:00:00');
+  const now = new Date();
+  const diff = Math.floor((now - start) / 86400000) + 1;
+  return Math.max(1, Math.min(diff, challengeConfig.durationDays));
+}
+
+function getChallengeDates() {
+  if (!challengeConfig.startDate) return [];
+  const start = new Date(challengeConfig.startDate + 'T00:00:00');
+  const dates = [];
+  for (let i = 0; i < challengeConfig.durationDays; i++) {
+    const d = new Date(start);
+    d.setDate(d.getDate() + i);
+    dates.push(toDateStr(d));
+  }
+  return dates;
+}
+
+function calcDayBase(log) {
+  if (!log) return 0;
+  let pts = 0;
+  HABITS.forEach(h => {
+    if (h.type === 'prayers') {
+      const p = log.prayers || [];
+      pts += p.filter(v => v === true).length * 2;
+    } else {
+      if (log[h.key] === true) pts += h.pts;
+    }
+  });
+  return pts;
+}
+
+function calcDayBonus(log) {
+  if (!log) return 0;
+  return log[BONUS_HABIT.key] === true ? BONUS_HABIT.pts : 0;
+}
+
+function calcDayPoints(log) {
+  return calcDayBase(log) + calcDayBonus(log);
+}
+
+function calcTotalPoints(name) {
+  const logs = allLogs[name] || {};
+  let total = 0;
+  Object.values(logs).forEach(log => { total += calcDayPoints(log); });
+  return total;
+}
+
+function calcTodayPoints(name) {
+  const log = (allLogs[name] || {})[todayStr()] || {};
+  return calcDayPoints(log);
+}
+
+function calcStreak(name) {
+  const logs = allLogs[name] || {};
+  const dates = getChallengeDates();
+  const today = todayStr();
+  let streak = 0;
+  for (let i = dates.length - 1; i >= 0; i--) {
+    if (dates[i] > today) continue;
+    const pts = calcDayPoints(logs[dates[i]]);
+    if (pts > 0) streak++;
+    else break;
+  }
+  return streak;
+}
+
+function calcLongestStreak(name) {
+  const logs = allLogs[name] || {};
+  const dates = getChallengeDates();
+  const today = todayStr();
+  let longest = 0, cur = 0;
+  for (const d of dates) {
+    if (d > today) break;
+    if (calcDayPoints(logs[d]) > 0) { cur++; longest = Math.max(longest, cur); }
+    else cur = 0;
+  }
+  return longest;
+}
+
+function calcPerHabitRate(name) {
+  const logs = allLogs[name] || {};
+  const dates = getChallengeDates().filter(d => d <= todayStr());
+  if (!dates.length) return {};
+  const result = {};
+  const allH = [...HABITS, BONUS_HABIT];
+  allH.forEach(h => {
+    let done = 0;
+    dates.forEach(d => {
+      const log = logs[d] || {};
+      if (h.type === 'prayers') {
+        const p = log.prayers || [];
+        done += p.filter(v => v === true).length / 5;
+      } else {
+        if (log[h.key] === true) done++;
+      }
+    });
+    result[h.key] = Math.round((done / dates.length) * 100);
+  });
+  return result;
+}
+
+// ═══ TOAST ═══
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+// ═══ OFFLINE ═══
+function updateOnlineStatus() {
+  const banner = document.getElementById('offline-banner');
+  if (!navigator.onLine) banner.classList.add('show');
+  else banner.classList.remove('show');
+}
+window.addEventListener('online', updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+updateOnlineStatus();
+
+// ═══ FIREBASE LISTENERS ═══
+function startListeners() {
+  db.ref('config').on('value', snap => {
+    const val = snap.val();
+    if (val) {
+      challengeConfig = { startDate: val.startDate || null, durationDays: val.durationDays || 30 };
+    }
+    refreshCurrentTab();
+  });
+
+  db.ref('participants').on('value', snap => {
+    const val = snap.val() || {};
+    allParticipants = Object.keys(val);
+    allParticipantData = val;
+    renderLoginNames();
+    populateParticipantSelects();
+    refreshCurrentTab();
+  });
+
+  db.ref('logs').on('value', snap => {
+    allLogs = snap.val() || {};
+    refreshCurrentTab();
+  });
+}
+
+function refreshCurrentTab() {
+  const active = document.querySelector('.tab.active');
+  if (!active) return;
+  const id = active.id.replace('tab-','');
+  if (id === 'today') renderToday();
+  else if (id === 'calendar') renderCalendar();
+  else if (id === 'leaderboard') renderLeaderboard();
+  else if (id === 'stats') renderStats();
+}
+
+// ═══ LOGIN ═══
+function renderLoginNames() {
+  const list = document.getElementById('name-list');
+  if (!allParticipants.length) {
+    list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-dim);font-size:14px">لا يوجد مشاركون بعد</div>';
+    return;
+  }
+  list.innerHTML = allParticipants.map(name => {
+    const safe = name.replace(/'/g,"\\'");
+    const data = allParticipantData[name];
+    const hasPin = data && typeof data === 'object' && data.pin;
+    const onclick = hasPin
+      ? `window.showPinEntry('${safe}')`
+      : `window.loginAs('${safe}')`;
+    const lockIcon = hasPin ? ' 🔐' : '';
+    return `
+      <button class="name-btn" onclick="${onclick}">
+        <span>${name}${lockIcon}</span>
+        <span style="font-size:13px;color:var(--text-dim)">${calcTotalPoints(name)} نقطة</span>
+      </button>`;
+  }).join('');
+}
+
+window.loginAs = function(name) {
+  currentUser = name;
+  localStorage.setItem('butula_user', name);
+  showApp();
+};
+
+window.addNewParticipant = function() {
+  const input = document.getElementById('new-name-input');
+  const name = input.value.trim();
+  if (!name) return;
+  if (allParticipants.includes(name)) { showToast('الاسم موجود مسبقاً'); return; }
+  // open PIN setup modal
+  document.getElementById('setup-for-name').textContent = name;
+  document.getElementById('setup-error').textContent = '';
+  clearPinGroup('setup-pin-boxes');
+  clearPinGroup('setup-confirm-boxes');
+  document.getElementById('pin-setup-modal').classList.add('open');
+  setTimeout(() => focusFirst('setup-pin-boxes'), 120);
+};
+
+window.logout = function() {
+  currentUser = null;
+  localStorage.removeItem('butula_user');
+  document.getElementById('app').classList.remove('visible');
+  document.getElementById('login-screen').style.display = 'flex';
+  renderLoginNames();
+};
+
+// ═══ PIN SYSTEM ═══
+function getPinVal(groupId) {
+  return Array.from(document.querySelectorAll(`#${groupId} .pin-box`))
+    .map(b => b.value).join('');
+}
+function clearPinGroup(groupId) {
+  document.querySelectorAll(`#${groupId} .pin-box`).forEach(b => {
+    b.value = '';
+    b.classList.remove('filled');
+    b.disabled = false;
+  });
+}
+function focusFirst(groupId) {
+  const first = document.querySelector(`#${groupId} .pin-box`);
+  if (first) { first.focus(); first.setSelectionRange(0,1); }
+}
+
+function initPinBoxes(groupId, onComplete) {
+  const boxes = Array.from(document.querySelectorAll(`#${groupId} .pin-box`));
+  boxes.forEach((box, i) => {
+    box.addEventListener('input', () => {
+      const v = box.value.replace(/\D/g, '');
+      box.value = v.slice(-1);
+      box.classList.toggle('filled', !!box.value);
+      if (box.value && i < boxes.length - 1) {
+        boxes[i + 1].focus();
+      }
+      if (box.value && i === boxes.length - 1 && onComplete) {
+        setTimeout(onComplete, 80);
+      }
+    });
+    box.addEventListener('keydown', e => {
+      if (e.key === 'Backspace' && !box.value && i > 0) {
+        boxes[i - 1].value = '';
+        boxes[i - 1].classList.remove('filled');
+        boxes[i - 1].focus();
+      }
+    });
+    box.addEventListener('focus', () => box.select());
+  });
+}
+
+window.showPinEntry = function(name) {
+  pinPendingName = name;
+  pinAttempts = 0;
+  pinLockUntil = 0;
+  document.getElementById('pin-screen-name').textContent = name;
+  document.getElementById('pin-error').textContent = '';
+  document.getElementById('pin-countdown').textContent = '';
+  document.getElementById('pin-submit-btn').disabled = false;
+  clearPinGroup('login-pin-boxes');
+  document.getElementById('pin-screen').classList.add('open');
+  setTimeout(() => focusFirst('login-pin-boxes'), 120);
+};
+
+window.cancelPin = function() {
+  document.getElementById('pin-screen').classList.remove('open');
+  pinPendingName = null;
+};
+
+window.clearPinEntry = function(groupId) {
+  clearPinGroup(groupId);
+  focusFirst(groupId);
+  document.getElementById('pin-error').textContent = '';
+};
+
+window.submitPin = async function() {
+  if (Date.now() < pinLockUntil) return;
+  const entered = getPinVal('login-pin-boxes');
+  if (entered.length < 4) {
+    document.getElementById('pin-error').textContent = 'أدخل 4 أرقام كاملة';
+    return;
+  }
+  const data = allParticipantData[pinPendingName];
+  const storedEncoded = data && typeof data === 'object' ? data.pin : null;
+  const storedPin = storedEncoded ? atob(storedEncoded) : null;
+
+  if (!storedPin || entered === storedPin) {
+    document.getElementById('pin-screen').classList.remove('open');
+    window.loginAs(pinPendingName);
+    return;
+  }
+
+  pinAttempts++;
+  clearPinGroup('login-pin-boxes');
+
+  if (pinAttempts >= 3) {
+    pinLockUntil = Date.now() + 30000;
+    document.getElementById('pin-error').textContent = 'تم القفل، انتظر 30 ثانية 🔒';
+    document.getElementById('pin-submit-btn').disabled = true;
+    document.querySelectorAll('#login-pin-boxes .pin-box').forEach(b => b.disabled = true);
+    startLockCountdown();
+  } else if (pinAttempts === 2) {
+    document.getElementById('pin-error').textContent = 'تبقى محاولة واحدة ⚠️';
+    focusFirst('login-pin-boxes');
+  } else {
+    document.getElementById('pin-error').textContent = 'PIN خاطئ، حاول مجدداً 🔴';
+    focusFirst('login-pin-boxes');
+  }
+};
+
+function startLockCountdown() {
+  const cd = document.getElementById('pin-countdown');
+  const tick = () => {
+    const rem = Math.ceil((pinLockUntil - Date.now()) / 1000);
+    if (rem <= 0) {
+      cd.textContent = '';
+      document.getElementById('pin-error').textContent = '';
+      document.getElementById('pin-submit-btn').disabled = false;
+      document.querySelectorAll('#login-pin-boxes .pin-box').forEach(b => b.disabled = false);
+      pinAttempts = 0;
+      focusFirst('login-pin-boxes');
+      return;
+    }
+    cd.textContent = rem;
+    setTimeout(tick, 1000);
+  };
+  tick();
+}
+
+// Setup PIN for new participant
+window.confirmSetupPin = function() {
+  const pin1 = getPinVal('setup-pin-boxes');
+  const pin2 = getPinVal('setup-confirm-boxes');
+  const errEl = document.getElementById('setup-error');
+  if (pin1.length < 4) { errEl.textContent = 'أدخل 4 أرقام'; focusFirst('setup-pin-boxes'); return; }
+  if (pin2.length < 4) { errEl.textContent = 'أكد الـ PIN'; focusFirst('setup-confirm-boxes'); return; }
+  if (pin1 !== pin2) {
+    errEl.textContent = 'رمزا PIN غير متطابقان ❌';
+    clearPinGroup('setup-confirm-boxes');
+    focusFirst('setup-confirm-boxes');
+    return;
+  }
+  const name = document.getElementById('setup-for-name').textContent;
+  db.ref(`participants/${name}`).set({ pin: btoa(pin1) })
+    .then(() => {
+      document.getElementById('pin-setup-modal').classList.remove('open');
+      document.getElementById('new-name-input').value = '';
+      showToast('تمت الإضافة ✅');
+    })
+    .catch(e => { errEl.textContent = 'خطأ: ' + e.message; });
+};
+
+window.cancelSetupPin = function() {
+  document.getElementById('pin-setup-modal').classList.remove('open');
+};
+
+// Admin reset PIN
+window.adminResetPinFor = function(name) {
+  document.getElementById('admin-reset-pin-name').textContent = name;
+  document.getElementById('admin-reset-pin-error').textContent = '';
+  clearPinGroup('admin-reset-pin-boxes');
+  document.getElementById('admin-reset-pin-modal').classList.add('open');
+  setTimeout(() => focusFirst('admin-reset-pin-boxes'), 120);
+};
+
+window.confirmAdminResetPin = function() {
+  const pin = getPinVal('admin-reset-pin-boxes');
+  const errEl = document.getElementById('admin-reset-pin-error');
+  if (pin.length < 4) { errEl.textContent = 'أدخل 4 أرقام'; return; }
+  const name = document.getElementById('admin-reset-pin-name').textContent;
+  db.ref(`participants/${name}/pin`).set(btoa(pin))
+    .then(() => {
+      document.getElementById('admin-reset-pin-modal').classList.remove('open');
+      showToast(`تم تحديث PIN لـ ${name} ✅`);
+    })
+    .catch(e => { errEl.textContent = 'خطأ: ' + e.message; });
+};
+
+window.cancelAdminResetPin = function() {
+  document.getElementById('admin-reset-pin-modal').classList.remove('open');
+};
+
+function showApp() {
+  document.getElementById('login-screen').style.display = 'none';
+  const app = document.getElementById('app');
+  app.classList.add('visible');
+  document.getElementById('user-name-display').textContent = currentUser;
+  const badge = document.getElementById('admin-badge');
+  badge.style.display = currentUser === ADMIN_NAME ? 'inline-flex' : 'none';
+  populateParticipantSelects();
+  renderToday();
+  // Set stats default to current user
+  const statsSelect = document.getElementById('stats-participant-select');
+  if (statsSelect && currentUser) {
+    for (let i=0; i<statsSelect.options.length; i++) {
+      if (statsSelect.options[i].value === currentUser) { statsSelect.selectedIndex = i; break; }
+    }
+  }
+}
+
+// ═══ PARTICIPANT SELECTS ═══
+function populateParticipantSelects() {
+  ['cal-participant-select','stats-participant-select'].forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    const prev = sel.value;
+    sel.innerHTML = allParticipants.map(n => `<option value="${n}"${n===prev?'selected':''}>${n}</option>`).join('');
+    if (!sel.value && currentUser) {
+      for (let i=0; i<sel.options.length; i++) {
+        if (sel.options[i].value === currentUser) { sel.selectedIndex = i; break; }
+      }
+    }
+  });
+}
+
+// ═══ TAB SWITCH ═══
+window.switchTab = function(tabId, btn) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-'+tabId).classList.add('active');
+  btn.classList.add('active');
+  if (tabId === 'today') renderToday();
+  else if (tabId === 'calendar') renderCalendar();
+  else if (tabId === 'leaderboard') renderLeaderboard();
+  else if (tabId === 'stats') renderStats();
+};
+
+// ═══ TODAY TAB ═══
+function renderToday() {
+  const today = todayStr();
+  document.getElementById('today-date-display').textContent = toArabicDate(today);
+  const day = getChallengeDay();
+  document.getElementById('challenge-day-display').textContent = `اليوم ${day} من 30`;
+
+  const userLog = (allLogs[currentUser] || {})[today] || {};
+  todayLog = JSON.parse(JSON.stringify(userLog));
+  updatePointsDisplay();
+  renderHabits();
+}
+
+function updatePointsDisplay() {
+  const base = calcDayBase(todayLog);
+  const bonus = calcDayBonus(todayLog);
+  const el = document.getElementById('points-big');
+  el.textContent = base;
+  el.classList.remove('flash');
+  void el.offsetWidth;
+  el.classList.add('flash');
+  document.getElementById('main-progress').style.width = base + '%';
+  const bonusLine = document.getElementById('points-bonus-line');
+  const label = document.getElementById('points-label');
+  if (bonus > 0) {
+    label.textContent = `/ 100 نقطة`;
+    bonusLine.textContent = `+ ${bonus} ⭐ بونص`;
+    bonusLine.style.display = 'block';
+  } else {
+    label.textContent = 'نقطة من 100';
+    bonusLine.style.display = 'none';
+  }
+}
+
+function habitCardState(val) {
+  if (val === true) return 'done';
+  if (val === false) return 'nope';
+  return '';
+}
+
+function yesnoBtns(key, val, isPrayer, idx) {
+  const callYes = isPrayer ? `window.setPrayerVal(${idx},true)` : `window.setHabitVal('${key}',true)`;
+  const callNo  = isPrayer ? `window.setPrayerVal(${idx},false)` : `window.setHabitVal('${key}',false)`;
+  return `<div class="yesno-btns">
+    <button class="yesno-btn yes-btn${val===true?' active':''}" onclick="${callYes}">✅ نعم</button>
+    <button class="yesno-btn no-btn${val===false?' active':''}" onclick="${callNo}">❌ لا</button>
+  </div>`;
+}
+
+function renderHabits() {
+  const container = document.getElementById('habits-list');
+  const prayers = todayLog.prayers || [null,null,null,null,null];
+  const doneCnt = prayers.filter(v => v === true).length;
+
+  const habitsHtml = HABITS.map(h => {
+    if (h.type === 'prayers') {
+      const state = doneCnt === 5 ? 'done' : doneCnt > 0 ? '' : '';
+      return `
+        <div class="habit-card${state?' '+state:''}" id="habit-card-prayers">
+          <div class="habit-main expandable" onclick="window.togglePrayersExpand()">
+            <span class="habit-emoji">🕌</span>
+            <div class="habit-info">
+              <div class="habit-name">الصلوات الخمس الفرائض</div>
+              <div class="habit-pts" id="prayers-pts-label">${doneCnt*2} / 10 نقطة • ${doneCnt}/5 صلوات</div>
+            </div>
+            <span style="color:var(--text-dim);font-size:18px;transition:transform 0.2s" id="prayers-arrow">▾</span>
+          </div>
+          <div class="prayers-expand open" id="prayers-expand">
+            ${PRAYERS.map((p,i) => `
+              <div class="prayer-yesno-row" id="prayer-row-${i}">
+                <span class="prayer-name">${p}</span>
+                ${yesnoBtns('prayer', prayers[i], true, i)}
+              </div>
+            `).join('')}
+          </div>
+        </div>`;
+    } else {
+      const val = todayLog[h.key];
+      return `
+        <div class="habit-card${val===true?' done':val===false?' nope':''}" id="habit-card-${h.key}">
+          <div class="habit-main">
+            <span class="habit-emoji">${h.emoji}</span>
+            <div class="habit-info">
+              <div class="habit-name">${h.name}</div>
+              <div class="habit-pts">${h.pts} نقطة</div>
+            </div>
+            ${yesnoBtns(h.key, val, false, null)}
+          </div>
+        </div>`;
+    }
+  }).join('');
+
+  const bonusVal = todayLog[BONUS_HABIT.key];
+  const bonusHtml = `
+    <div class="bonus-card${bonusVal===true?' done':bonusVal===false?' nope':''}" id="habit-card-${BONUS_HABIT.key}">
+      <div class="habit-main">
+        <span class="habit-emoji">${BONUS_HABIT.emoji}</span>
+        <div class="habit-info">
+          <div class="habit-name">${BONUS_HABIT.name}</div>
+          <div class="habit-pts">${BONUS_HABIT.pts} نقطة</div>
+          <div class="bonus-badge">بونص ⭐</div>
+        </div>
+        ${yesnoBtns(BONUS_HABIT.key, bonusVal, false, null)}
+      </div>
+    </div>`;
+
+  container.innerHTML = habitsHtml + bonusHtml;
+}
+
+window.togglePrayersExpand = function() {
+  const el = document.getElementById('prayers-expand');
+  const arrow = document.getElementById('prayers-arrow');
+  if (el) {
+    el.classList.toggle('open');
+    if (arrow) arrow.style.transform = el.classList.contains('open') ? '' : 'rotate(-90deg)';
+  }
+};
+
+window.setPrayerVal = function(idx, val) {
+  if (!todayLog.prayers) todayLog.prayers = [null,null,null,null,null];
+  // clicking same active button toggles it off → null
+  todayLog.prayers[idx] = (todayLog.prayers[idx] === val) ? null : val;
+  saveToday();
+  // update prayer row buttons
+  const row = document.getElementById('prayer-row-'+idx);
+  if (row) {
+    row.querySelectorAll('.yes-btn').forEach(b => b.classList.toggle('active', todayLog.prayers[idx] === true));
+    row.querySelectorAll('.no-btn').forEach(b => b.classList.toggle('active', todayLog.prayers[idx] === false));
+  }
+  const doneCnt = todayLog.prayers.filter(v => v === true).length;
+  const card = document.getElementById('habit-card-prayers');
+  if (card) {
+    card.className = 'habit-card' + (doneCnt === 5 ? ' done' : '');
+    const lbl = document.getElementById('prayers-pts-label');
+    if (lbl) lbl.textContent = `${doneCnt*2} / 10 نقطة • ${doneCnt}/5 صلوات`;
+  }
+  updatePointsDisplay();
+};
+
+window.setHabitVal = function(key, val) {
+  // clicking same active button toggles it off → undefined
+  todayLog[key] = (todayLog[key] === val) ? undefined : val;
+  saveToday();
+  const card = document.getElementById('habit-card-'+key);
+  if (card) {
+    const v = todayLog[key];
+    card.className = (key === BONUS_HABIT.key ? 'bonus-card' : 'habit-card') +
+      (v === true ? ' done' : v === false ? ' nope' : '');
+    card.querySelectorAll('.yes-btn').forEach(b => b.classList.toggle('active', v === true));
+    card.querySelectorAll('.no-btn').forEach(b => b.classList.toggle('active', v === false));
+  }
+  updatePointsDisplay();
+};
+
+function saveToday() {
+  const today = todayStr();
+  db.ref(`logs/${currentUser}/${today}`).set(todayLog)
+    .then(() => showToast('تم الحفظ ✅'))
+    .catch(() => showToast('خطأ في الحفظ ❌'));
+}
+
+// ═══ CALENDAR TAB ═══
+window.renderCalendar = function() {
+  const sel = document.getElementById('cal-participant-select');
+  const name = sel ? sel.value : (allParticipants[0] || '');
+  const container = document.getElementById('calendar-rows');
+  if (!name) { container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📅</div><div>لا يوجد مشاركون</div></div>'; return; }
+
+  const dates = getChallengeDates();
+  const today = todayStr();
+  const logs = allLogs[name] || {};
+
+  if (!dates.length) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📅</div><div>لم يتم تحديد تاريخ البدء</div></div>';
+    return;
+  }
+
+  container.innerHTML = dates.map((d, idx) => {
+    const isFuture = d > today;
+    const log = logs[d] || null;
+    const pts = isFuture ? null : calcDayPoints(log);
+    const ptsLabel = isFuture ? 'قادم' : `${pts||0}`;
+    let barColor = '#555';
+    if (!isFuture) {
+      barColor = pts >= 80 ? '#52b788' : pts >= 50 ? '#f4a261' : '#e63946';
+    }
+    const width = isFuture ? 0 : (pts || 0);
+    const bonus = isFuture ? 0 : calcDayBonus(log);
+    const bonusLabel = bonus > 0 ? ` +${bonus}⭐` : '';
+    const expandContent = !isFuture && log ? [
+      ...HABITS.map(h => {
+        let done = false;
+        if (h.type === 'prayers') {
+          done = (log.prayers || []).filter(v => v === true).length === 5;
+        } else { done = log[h.key] === true; }
+        return `<span class="cal-habit-chip ${done?'done':'not'}">${h.emoji} ${h.name.split(' ')[0]}</span>`;
+      }),
+      `<span class="cal-habit-chip ${log[BONUS_HABIT.key]===true?'done':'not'}">${BONUS_HABIT.emoji} بونص</span>`
+    ].join('') : '';
+
+    return `
+      <div class="cal-row" onclick="window.toggleCalRow(this)">
+        <div class="cal-row-header">
+          <div class="cal-date">
+            <div style="font-size:12px;color:var(--gold)">يوم ${idx+1}</div>
+            <div style="font-size:11px">${shortArabicDate(d)}</div>
+          </div>
+          <div class="cal-bar-wrap"><div class="cal-bar" style="width:${width}%;background:${barColor}"></div></div>
+          <div class="cal-pts" style="color:${barColor}">${isFuture?'قادم':(pts||0)}${bonusLabel}</div>
+        </div>
+        ${expandContent ? `<div class="cal-expand">${expandContent}</div>` : ''}
+      </div>`;
+  }).join('');
+};
+
+window.toggleCalRow = function(row) {
+  const exp = row.querySelector('.cal-expand');
+  if (exp) exp.classList.toggle('open');
+};
+
+// ═══ LEADERBOARD TAB ═══
+function renderLeaderboard() {
+  const day = getChallengeDay();
+  document.getElementById('lb-day-num').textContent = day;
+
+  const ranked = allParticipants.map(name => ({
+    name,
+    total: calcTotalPoints(name),
+    today: calcTodayPoints(name),
+    streak: calcStreak(name),
+  })).sort((a,b) => b.total - a.total);
+
+  const medals = ['🥇','🥈','🥉'];
+  const container = document.getElementById('leaderboard-list');
+  if (!ranked.length) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🏆</div><div>لا يوجد مشاركون</div></div>';
+    return;
+  }
+  container.innerHTML = ranked.map((p, i) => {
+    const todayLog_ = (allLogs[p.name] || {})[todayStr()] || {};
+    const todayBase = calcDayBase(todayLog_);
+    const todayBonus = calcDayBonus(todayLog_);
+    const todayLabel = todayBonus > 0 ? `${todayBase}+${todayBonus}⭐` : `${todayBase}`;
+    return `
+    <div class="leader-item${p.name===currentUser?' me':''}">
+      <div class="leader-rank">${i < 3 ? medals[i] : `#${i+1}`}</div>
+      <div class="leader-info">
+        <div class="leader-name">${p.name}${p.name===currentUser?' 👤':''}</div>
+        <div class="leader-meta">🔥 ${p.streak} يوم متتالي</div>
+      </div>
+      <div class="leader-pts">
+        <div class="leader-pts-big">${p.total}</div>
+        <div class="leader-pts-today">اليوم: ${todayLabel}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+window.shareLeaderboard = function() {
+  const day = getChallengeDay();
+  const ranked = allParticipants.map(name => ({
+    name, total: calcTotalPoints(name),
+  })).sort((a,b) => b.total - a.total);
+
+  const medals = ['🥇','🥈','🥉'];
+  const numEmojis = ['4️⃣','5️⃣','6️⃣','7️⃣','8️⃣','9️⃣','🔟'];
+  const dateLabel = new Date().toLocaleDateString('ar-SA', { weekday:'long', day:'numeric', month:'long' });
+  const divider = '━━━━━━━━━━━━━━━';
+
+  const rows = ranked.map((p, i) => {
+    const medal = i < 3 ? medals[i] : (numEmojis[i-3] || `${i+1}.`);
+    return `${medal} ${p.name} — ${p.total} نقطة`;
+  }).join('\n');
+
+  const msg =
+    `🏆 البطولة - اليوم ${day} من 30\n` +
+    `${divider}\n` +
+    rows + '\n' +
+    `${divider}\n` +
+    `📅 التاريخ: ${dateLabel}\n` +
+    `💪 استمروا في التحدي!`;
+
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  if (isMobile) {
+    window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+  } else {
+    navigator.clipboard.writeText(msg)
+      .then(() => showToast('تم النسخ ✅'))
+      .catch(() => {
+        // fallback for browsers that deny clipboard
+        const ta = document.createElement('textarea');
+        ta.value = msg;
+        ta.style.position = 'fixed'; ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select(); document.execCommand('copy');
+        document.body.removeChild(ta);
+        showToast('تم النسخ ✅');
+      });
+  }
+};
+
+// ═══ STATS TAB ═══
+window.renderStats = function() {
+  const sel = document.getElementById('stats-participant-select');
+  const name = sel ? sel.value : currentUser;
+  const container = document.getElementById('stats-content');
+  if (!name) { container.innerHTML = ''; return; }
+
+  const logs = allLogs[name] || {};
+  const dates = getChallengeDates().filter(d => d <= todayStr());
+  const dayCount = dates.length;
+
+  const totalPts = calcTotalPoints(name);
+  const totalBase = dates.reduce((s,d) => s + calcDayBase(logs[d]), 0);
+  const totalBonus = dates.reduce((s,d) => s + calcDayBonus(logs[d]), 0);
+  const avgPts = dayCount ? Math.round(totalPts / dayCount) : 0;
+  const bestDay = dayCount ? Math.max(...dates.map(d => calcDayPoints(logs[d]))) : 0;
+  const streak = calcStreak(name);
+  const longestStreak = calcLongestStreak(name);
+  const overallPct = dayCount ? Math.round(totalBase / (dayCount * 100) * 100) : 0;
+  const habitRates = calcPerHabitRate(name);
+
+  const motivational =
+    overallPct >= 80 ? 'أنت نجم البطولة ⭐' :
+    overallPct >= 60 ? 'أداء رائع، استمر 💪' :
+    overallPct >= 40 ? 'في المسار الصحيح 🌱' :
+    'لا تستسلم، كل يوم فرصة جديدة 🌅';
+
+  const bonusTotalLabel = totalBonus > 0
+    ? `<span style="font-size:13px;color:var(--gold);margin-right:4px">+ ${totalBonus} ⭐ بونص</span>`
+    : '';
+
+  container.innerHTML = `
+    <div class="motivational">${motivational}</div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-val">${totalBase}</div>
+        ${bonusTotalLabel}
+        <div class="stat-label">مجموع النقاط</div>
+      </div>
+      <div class="stat-card"><div class="stat-val">${avgPts}</div><div class="stat-label">متوسط يومي</div></div>
+      <div class="stat-card"><div class="stat-val">${bestDay}</div><div class="stat-label">أفضل يوم</div></div>
+      <div class="stat-card"><div class="stat-val">${streak}</div><div class="stat-label">🔥 المتتالي الحالي</div></div>
+      <div class="stat-card" style="grid-column:1/-1"><div class="stat-val">${longestStreak}</div><div class="stat-label">أطول سلسلة متتالية</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">نسبة إنجاز كل عادة</div>
+      ${HABITS.map(h => `
+        <div class="habit-stat-row">
+          <div class="habit-stat-header">
+            <span>${h.emoji} ${h.name.split('(')[0].trim()}</span>
+            <span class="habit-stat-pct">${habitRates[h.key]||0}%</span>
+          </div>
+          <div class="habit-stat-bar"><div class="habit-stat-fill" style="width:${habitRates[h.key]||0}%"></div></div>
+        </div>
+      `).join('')}
+      <div class="habit-stat-row" style="margin-top:14px;padding-top:12px;border-top:1px solid var(--green-light)">
+        <div class="habit-stat-header">
+          <span>${BONUS_HABIT.emoji} ${BONUS_HABIT.name} <span style="background:var(--gold);color:#1a1a1a;font-size:10px;padding:1px 6px;border-radius:10px;font-weight:800">بونص</span></span>
+          <span class="habit-stat-pct">${habitRates[BONUS_HABIT.key]||0}%</span>
+        </div>
+        <div class="habit-stat-bar"><div class="habit-stat-fill" style="width:${habitRates[BONUS_HABIT.key]||0}%;background:linear-gradient(90deg,var(--gold),var(--gold-light))"></div></div>
+      </div>
+    </div>
+  `;
+};
+
+// ═══ ADMIN PANEL ═══
+window.openAdmin = function() {
+  if (currentUser !== ADMIN_NAME) return;
+  const panel = document.getElementById('admin-panel');
+  panel.classList.add('open');
+  const dateInput = document.getElementById('admin-start-date');
+  if (challengeConfig.startDate) dateInput.value = challengeConfig.startDate;
+  renderAdminParticipants();
+};
+
+window.closeAdmin = function() {
+  document.getElementById('admin-panel').classList.remove('open');
+};
+
+function renderAdminParticipants() {
+  const list = document.getElementById('admin-participants-list');
+  list.innerHTML = allParticipants.map(name => {
+    const safe = name.replace(/'/g,"\\'");
+    return `
+    <div class="remove-participant-item">
+      <span>${name}</span>
+      <div style="display:flex;gap:6px">
+        <button class="btn-remove-small" style="background:var(--green-light);color:var(--text)"
+          onclick="window.adminResetPinFor('${safe}')">🔑 PIN</button>
+        <button class="btn-remove-small" onclick="window.adminRemoveParticipant('${safe}')">حذف</button>
+      </div>
+    </div>`;
+  }).join('') || '<div style="color:var(--text-dim);font-size:14px;padding:8px">لا يوجد مشاركون</div>';
+}
+
+window.adminSetStartDate = function() {
+  const val = document.getElementById('admin-start-date').value;
+  if (!val) return;
+  db.ref('config').update({ startDate: val, durationDays: 30 })
+    .then(() => showToast('تم التحديث ✅'))
+    .catch(e => alert('خطأ: ' + e.message));
+};
+
+window.adminResetChallenge = function() {
+  if (!confirm('هل أنت متأكد؟ سيتم حذف كل البيانات!')) return;
+  db.ref('logs').remove()
+    .then(() => { showToast('تم إعادة التعيين ✅'); closeAdmin(); })
+    .catch(e => alert('خطأ: ' + e.message));
+};
+
+window.adminRemoveParticipant = function(name) {
+  if (!confirm(`حذف ${name}؟`)) return;
+  const updates = {};
+  updates[`participants/${name}`] = null;
+  updates[`logs/${name}`] = null;
+  db.ref().update(updates)
+    .then(() => { showToast(`تم حذف ${name} ✅`); renderAdminParticipants(); })
+    .catch(e => alert('خطأ: ' + e.message));
+};
+
+// ═══ INIT ═══
+async function init() {
+  // Check saved user
+  const savedUser = localStorage.getItem('butula_user');
+
+  // Initialize config if needed
+  const configSnap = await db.ref('config').once('value');
+  if (!configSnap.val()) {
+    await db.ref('config').set({ startDate: todayStr(), durationDays: 30 });
+  }
+
+  // Start all firebase listeners
+  startListeners();
+
+  // Wait a tick for first data
+  setTimeout(() => {
+    document.getElementById('loading-screen').style.display = 'none';
+
+    if (savedUser && allParticipants.includes(savedUser)) {
+      currentUser = savedUser;
+      showApp();
+    } else if (savedUser) {
+      // Name no longer exists or not loaded yet — wait for participants
+      const unsub = db.ref('participants').once('value').then(snap => {
+        const parts = Object.keys(snap.val() || {});
+        if (parts.includes(savedUser)) {
+          currentUser = savedUser;
+          allParticipants = parts;
+          showApp();
+        } else {
+          localStorage.removeItem('butula_user');
+          document.getElementById('login-screen').style.display = 'flex';
+        }
+      });
+    } else {
+      document.getElementById('login-screen').style.display = 'flex';
+    }
+  }, 1200);
+}
+
+init();
+
+// Wire up PIN box auto-advance after DOM is ready
+initPinBoxes('login-pin-boxes', window.submitPin);
+initPinBoxes('setup-pin-boxes', () => focusFirst('setup-confirm-boxes'));
+initPinBoxes('setup-confirm-boxes', window.confirmSetupPin);
+initPinBoxes('admin-reset-pin-boxes', window.confirmAdminResetPin);
+</script>
+
+<script>
+// ═══ SERVICE WORKER ═══
+if ('serviceWorker' in navigator) {
+  const swCode = `
+const CACHE = 'butula-v1';
+const SHELL = ['/'];
+self.addEventListener('install', e => {
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)));
+  self.skipWaiting();
+});
+self.addEventListener('activate', e => {
+  e.waitUntil(caches.keys().then(keys =>
+    Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
+  ));
+  self.clients.claim();
+});
+self.addEventListener('fetch', e => {
+  if (e.request.method !== 'GET') return;
+  e.respondWith(
+    fetch(e.request).then(r => {
+      const clone = r.clone();
+      caches.open(CACHE).then(c => c.put(e.request, clone));
+      return r;
+    }).catch(() => caches.match(e.request))
+  );
+});
+`;
+  const blob = new Blob([swCode], {type:'text/javascript'});
+  const swUrl = URL.createObjectURL(blob);
+  navigator.serviceWorker.register(swUrl).catch(() => {});
+}
+</script>
+</body>
+</html>
