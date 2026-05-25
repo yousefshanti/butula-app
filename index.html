@@ -189,27 +189,87 @@ html, body {
 
 /* ═══ TOP BAR ═══ */
 .top-bar {
-  background: var(--surface);
-  padding: 12px 16px;
+  background: linear-gradient(135deg, #0d2e0d 0%, #1a472a 60%, #2a3a10 100%);
+  padding: 0 16px;
+  height: 62px;
   display: flex; align-items: center; justify-content: space-between;
-  border-bottom: 1px solid var(--green-light);
+  border-bottom: 1px solid rgba(201,168,76,0.25);
+  box-shadow: 0 3px 16px rgba(0,0,0,0.45);
   flex-shrink: 0;
+  position: relative;
 }
-.top-bar-title {
-  font-size: 20px; font-weight: 800; color: var(--gold);
-}
-.top-bar-user {
-  font-size: 14px; color: var(--text-dim);
+/* centre title absolutely so left/right slots don't shift it */
+.top-bar-center {
+  position: absolute;
+  left: 50%; transform: translateX(-50%);
   display: flex; align-items: center; gap: 6px;
+  pointer-events: none;
 }
-.admin-badge {
-  background: var(--gold);
+.top-bar-app-name {
+  font-size: 18px; font-weight: 900;
+  background: linear-gradient(90deg, var(--gold-light), var(--gold));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 0.5px;
+}
+.top-bar-trophy { font-size: 20px; -webkit-text-fill-color: initial; }
+
+/* left slot (user info) */
+.top-bar-user {
+  display: flex; align-items: center; gap: 8px;
+  z-index: 1;
+}
+.user-avatar {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
   color: #1a1a1a;
-  font-size: 11px;
-  font-weight: 700;
-  padding: 2px 7px;
-  border-radius: 20px;
+  font-size: 15px; font-weight: 900;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(201,168,76,0.4);
 }
+.user-name-text {
+  font-size: 14px; font-weight: 700;
+  color: var(--text);
+  max-width: 80px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* right slot (action icons) */
+.top-bar-actions {
+  display: flex; align-items: center; gap: 4px;
+  z-index: 1;
+}
+.top-bar-icon-btn {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,0.08);
+  color: var(--text-dim);
+  font-size: 18px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Tajawal', sans-serif;
+}
+.top-bar-icon-btn:active { background: rgba(255,255,255,0.18); transform: scale(0.92); }
+.top-bar-icon-btn.admin-btn-icon { color: var(--gold); }
+.top-bar-switch-btn {
+  height: 30px;
+  padding: 0 10px;
+  border-radius: 20px;
+  border: 1.5px solid rgba(201,168,76,0.5);
+  background: rgba(201,168,76,0.08);
+  color: var(--gold-light);
+  font-family: 'Tajawal', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.top-bar-switch-btn:active { background: rgba(201,168,76,0.2); transform: scale(0.95); }
 
 /* ═══ CONTENT ═══ */
 .content {
@@ -878,11 +938,23 @@ html, body {
 <!-- Main App -->
 <div id="app">
   <div class="top-bar">
-    <div class="top-bar-title">البطولة 🏆</div>
+    <!-- left: user avatar + name -->
     <div class="top-bar-user">
-      <span id="user-name-display"></span>
-      <span class="admin-badge" id="admin-badge" style="display:none" onclick="window.openAdmin()">⚙️ إدارة</span>
-      <span style="cursor:pointer;font-size:13px;color:var(--text-dim)" onclick="window.logout()">تغيير</span>
+      <div class="user-avatar" id="user-avatar">?</div>
+      <span class="user-name-text" id="user-name-display"></span>
+    </div>
+
+    <!-- centre: app name (absolute) -->
+    <div class="top-bar-center">
+      <span class="top-bar-trophy">🏆</span>
+      <span class="top-bar-app-name">البطولة</span>
+    </div>
+
+    <!-- right: icon buttons -->
+    <div class="top-bar-actions">
+      <button class="top-bar-icon-btn admin-btn-icon" id="admin-badge"
+              style="display:none" onclick="window.openAdmin()" title="الإدارة">⚙️</button>
+      <button class="top-bar-switch-btn" onclick="window.logout()">تغيير الحساب</button>
     </div>
   </div>
 
@@ -1434,8 +1506,9 @@ function showApp() {
   const app = document.getElementById('app');
   app.classList.add('visible');
   document.getElementById('user-name-display').textContent = currentUser;
+  document.getElementById('user-avatar').textContent = currentUser.charAt(0);
   const badge = document.getElementById('admin-badge');
-  badge.style.display = currentUser === ADMIN_NAME ? 'inline-flex' : 'none';
+  badge.style.display = currentUser === ADMIN_NAME ? 'flex' : 'none';
   populateParticipantSelects();
   renderToday();
   // Set stats default to current user
