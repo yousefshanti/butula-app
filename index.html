@@ -988,7 +988,7 @@ html, body {
 
     <!-- CALENDAR TAB -->
     <div class="tab" id="tab-calendar">
-      <div class="select-row">
+      <div id="cal-admin-select-row" class="select-row" style="display:none">
         <label>المشارك:</label>
         <select class="styled-select" id="cal-participant-select" onchange="window.renderCalendar()"></select>
       </div>
@@ -1012,7 +1012,7 @@ html, body {
 
     <!-- STATS TAB -->
     <div class="tab" id="tab-stats">
-      <div class="select-row">
+      <div id="stats-admin-select-row" class="select-row" style="display:none">
         <label>المشارك:</label>
         <select class="styled-select" id="stats-participant-select" onchange="window.renderStats()"></select>
       </div>
@@ -1592,17 +1592,12 @@ function showApp() {
   app.classList.add('visible');
   document.getElementById('user-name-display').textContent = currentUser;
   document.getElementById('user-avatar').textContent = currentUser.charAt(0);
-  const badge = document.getElementById('admin-badge');
-  badge.style.display = currentUser === ADMIN_NAME ? 'flex' : 'none';
+  const isAdmin = currentUser === ADMIN_NAME;
+  document.getElementById('admin-badge').style.display = isAdmin ? 'flex' : 'none';
+  document.getElementById('cal-admin-select-row').style.display = isAdmin ? 'flex' : 'none';
+  document.getElementById('stats-admin-select-row').style.display = isAdmin ? 'flex' : 'none';
   populateParticipantSelects();
   renderToday();
-  // Set stats default to current user
-  const statsSelect = document.getElementById('stats-participant-select');
-  if (statsSelect && currentUser) {
-    for (let i=0; i<statsSelect.options.length; i++) {
-      if (statsSelect.options[i].value === currentUser) { statsSelect.selectedIndex = i; break; }
-    }
-  }
 }
 
 // ═══ PARTICIPANT SELECTS ═══
@@ -1785,7 +1780,7 @@ function saveToday() {
 // ═══ CALENDAR TAB ═══
 window.renderCalendar = function() {
   const sel = document.getElementById('cal-participant-select');
-  const name = sel ? sel.value : (allParticipants[0] || '');
+  const name = (currentUser === ADMIN_NAME && sel && sel.value) ? sel.value : currentUser;
   const container = document.getElementById('calendar-rows');
   if (!name) { container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📅</div><div>لا يوجد مشاركون</div></div>'; return; }
 
@@ -1927,7 +1922,7 @@ window.shareLeaderboard = function() {
 // ═══ STATS TAB ═══
 window.renderStats = function() {
   const sel = document.getElementById('stats-participant-select');
-  const name = sel ? sel.value : currentUser;
+  const name = (currentUser === ADMIN_NAME && sel && sel.value) ? sel.value : currentUser;
   const container = document.getElementById('stats-content');
   if (!name) { container.innerHTML = ''; return; }
 
