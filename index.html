@@ -345,6 +345,43 @@ html, body {
   font-size: 13px;
   color: var(--text-dim);
 }
+.date-nav-btns {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+.date-nav-btn {
+  background: var(--surface2);
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 13px;
+  font-family: 'Tajawal', sans-serif;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.date-nav-btn.active-day {
+  background: var(--gold);
+  color: var(--bg);
+}
+.date-nav-btn:active {
+  opacity: 0.8;
+}
+#yesterday-warning {
+  display: none;
+  background: linear-gradient(90deg, #b8860b, #c9a84c);
+  color: #1a1a00;
+  font-size: 13px;
+  font-weight: 800;
+  text-align: center;
+  padding: 8px 12px;
+  border-radius: var(--radius);
+  margin-bottom: 12px;
+  border: 1px solid var(--gold);
+}
 .points-total-card {
   background: linear-gradient(135deg, var(--green) 0%, var(--green-light) 100%);
   border-radius: var(--radius);
@@ -974,7 +1011,12 @@ html, body {
       <div class="today-header">
         <div class="today-date" id="today-date-display"></div>
         <div class="today-day" id="challenge-day-display"></div>
+        <div class="date-nav-btns">
+          <button class="date-nav-btn active-day" id="btn-go-today" onclick="window.goToToday()">→ اليوم</button>
+          <button class="date-nav-btn" id="btn-go-yesterday" onclick="window.goToYesterday()">→ أمس</button>
+        </div>
       </div>
+      <div id="yesterday-warning">⚠️ أنت تعدّل يوم أمس</div>
       <div class="points-total-card">
         <div class="points-big" id="points-big">0</div>
         <div class="points-label" id="points-label">نقطة من 100</div>
@@ -1597,6 +1639,7 @@ function showApp() {
   document.getElementById('cal-admin-select-row').style.display = isAdmin ? 'flex' : 'none';
   document.getElementById('stats-admin-select-row').style.display = isAdmin ? 'flex' : 'none';
   populateParticipantSelects();
+  viewingDate = null;
   renderToday();
 }
 
@@ -1628,13 +1671,41 @@ window.switchTab = function(tabId, btn) {
 };
 
 // ═══ TODAY TAB ═══
+let viewingDate = null; // null = today, 'YYYY-MM-DD' = yesterday
+
+function getYesterdayStr() {
+  const d = new Date();
+  d.setDate(d.getDate() - 1);
+  return toDateStr(d);
+}
+
+window.goToToday = function() {
+  viewingDate = null;
+  renderToday();
+};
+
+window.goToYesterday = function() {
+  viewingDate = getYesterdayStr();
+  renderToday();
+};
+
 function renderToday() {
-  const today = todayStr();
-  document.getElementById('today-date-display').textContent = toArabicDate(today);
+  const isYesterday = viewingDate !== null;
+  const dateToShow = isYesterday ? viewingDate : todayStr();
+
+  document.getElementById('today-date-display').textContent = toArabicDate(dateToShow);
   const day = getChallengeDay();
   document.getElementById('challenge-day-display').textContent = `اليوم ${day} من 30`;
 
-  const userLog = (allLogs[currentUser] || {})[today] || {};
+  // warning banner
+  const warning = document.getElementById('yesterday-warning');
+  warning.style.display = isYesterday ? 'block' : 'none';
+
+  // nav buttons active state
+  document.getElementById('btn-go-today').classList.toggle('active-day', !isYesterday);
+  document.getElementById('btn-go-yesterday').classList.toggle('active-day', isYesterday);
+
+  const userLog = (allLogs[currentUser] || {})[dateToShow] || {};
   todayLog = JSON.parse(JSON.stringify(userLog));
   updatePointsDisplay();
   renderHabits();
@@ -1771,8 +1842,8 @@ window.setHabitVal = function(key, val) {
 };
 
 function saveToday() {
-  const today = todayStr();
-  db.ref(`logs/${currentUser}/${today}`).set(todayLog)
+  const saveDate = viewingDate !== null ? viewingDate : todayStr();
+  db.ref(`logs/${currentUser}/${saveDate}`).set(todayLog)
     .then(() => { showToast('تم الحفظ ✅'); checkAndAwardBonuses(); })
     .catch(() => showToast('خطأ في الحفظ ❌'));
 }
