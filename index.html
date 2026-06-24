@@ -2072,18 +2072,24 @@ function renderQadaa() {
   const container = document.getElementById('qadaa-content');
   if (!container) return;
   // الخصوصية: صلوات المستخدم الحالي فقط
-  const data = allQadaa[currentUser] || {};
-  const entries = Object.keys(data).map(key => {
-    const sep = key.indexOf('_');
-    const date = key.slice(0, sep);
-    const pkey = key.slice(sep + 1);
-    return { key, date, name: PRAYER_KEY_NAME[pkey] || pkey, done: data[key] === true };
+  // افحص كل الأيام المسجّلة (كل الأشهر مدمجة) منذ بداية البطولة وحتى اليوم،
+  // وأضف أي صلاة قيمتها false صراحةً ("لا"). تجاهل غير المسجّلة (null/رمادي).
+  const logs = flattenUserLogs(allLogs[currentUser] || {});
+  const qadaaData = allQadaa[currentUser] || {};
+  const today = todayStr();
+  const entries = [];
+  Object.keys(logs).forEach(date => {
+    if (date > today) return;
+    const prayers = (logs[date] || {}).prayers || [];
+    PRAYER_KEYS.forEach((pkey, idx) => {
+      if (prayers[idx] === false) {
+        const key = `${date}_${pkey}`;
+        entries.push({ key, date, idx, name: PRAYER_KEY_NAME[pkey] || pkey, done: qadaaData[key] === true });
+      }
+    });
   });
 
-  const order = { fajr:0, dhuhr:1, asr:2, maghrib:3, isha:4 };
-  const sortFn = (a, b) => (a.date === b.date)
-    ? (order[a.key.slice(a.key.indexOf('_')+1)] ?? 0) - (order[b.key.slice(b.key.indexOf('_')+1)] ?? 0)
-    : a.date.localeCompare(b.date); // الأقدم أولاً للقضاء بالترتيب
+  const sortFn = (a, b) => (a.date === b.date) ? a.idx - b.idx : a.date.localeCompare(b.date); // الأقدم أولاً
 
   const pending = entries.filter(e => !e.done).sort(sortFn);
   const done = entries.filter(e => e.done).sort(sortFn);
