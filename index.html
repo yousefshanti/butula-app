@@ -1732,7 +1732,7 @@ function showApp() {
   document.getElementById('stats-admin-select-row').style.display = isAdmin ? 'flex' : 'none';
   populateParticipantSelects();
   viewingDate = null;
-  renderToday();
+  renderToday(true);
 }
 
 // ═══ PARTICIPANT SELECTS ═══
@@ -1756,7 +1756,7 @@ window.switchTab = function(tabId, btn) {
   document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-'+tabId).classList.add('active');
   btn.classList.add('active');
-  if (tabId === 'today') renderToday();
+  if (tabId === 'today') renderToday(true);
   else if (tabId === 'calendar') renderCalendar();
   else if (tabId === 'leaderboard') renderLeaderboard();
   else if (tabId === 'stats') renderStats();
@@ -1764,10 +1764,11 @@ window.switchTab = function(tabId, btn) {
 
 // ═══ TODAY TAB ═══
 let viewingDate = null; // null = today, 'YYYY-MM-DD' = any past date
+let pendingWrites = 0;  // عدد عمليات الحفظ الجارية — يمنع المستمع من مسح التعديلات المحلية
 
 window.goToToday = function() {
   viewingDate = null;
-  renderToday();
+  renderToday(true);
 };
 
 window.goToPrevDay = function() {
@@ -1777,7 +1778,7 @@ window.goToPrevDay = function() {
   const prev = toDateStr(d);
   if (challengeConfig.startDate && prev < challengeConfig.startDate) return;
   viewingDate = prev;
-  renderToday();
+  renderToday(true);
 };
 
 window.goToNextDay = function() {
@@ -1786,10 +1787,12 @@ window.goToNextDay = function() {
   d.setDate(d.getDate() + 1);
   const next = toDateStr(d);
   viewingDate = next >= todayStr() ? null : next;
-  renderToday();
+  renderToday(true);
 };
 
-function renderToday() {
+// forceReload = true: أعد تحميل todayLog من السيرفر (تنقّل/دخول).
+// المستمع يستدعيها بدون forceReload فلا تمسح التعديلات أثناء الحفظ.
+function renderToday(forceReload) {
   const isToday    = viewingDate === null;
   const dateToShow = isToday ? todayStr() : viewingDate;
   const dayNum     = getChallengeDay(dateToShow);
@@ -1810,8 +1813,11 @@ function renderToday() {
   document.getElementById('btn-prev-day').disabled = atStart;
   document.getElementById('btn-next-day').disabled = isToday;
 
-  const userLog = flattenUserLogs(allLogs[currentUser] || {})[dateToShow] || {};
-  todayLog = JSON.parse(JSON.stringify(userLog));
+  // لا تستبدل todayLog من السيرفر أثناء وجود حفظ جارٍ — وإلا تُمسح ضغطات سريعة
+  if (forceReload || pendingWrites === 0) {
+    const userLog = flattenUserLogs(allLogs[currentUser] || {})[dateToShow] || {};
+    todayLog = JSON.parse(JSON.stringify(userLog));
+  }
   updatePointsDisplay();
   renderHabits();
 }
@@ -1935,8 +1941,9 @@ window.setPrayerVal = function(idx, val) {
 };
 
 window.setHabitVal = function(key, val) {
-  // clicking same active button toggles it off → undefined
-  todayLog[key] = (todayLog[key] === val) ? undefined : val;
+  // الضغط على الزر المفعّل نفسه يلغيه → نحذف المفتاح (لا undefined لأن Firebase يرفضه)
+  if (todayLog[key] === val) delete todayLog[key];
+  else todayLog[key] = val;
   saveToday();
   const card = document.getElementById('habit-card-'+key);
   if (card) {
@@ -1948,12 +1955,24 @@ window.setHabitVal = function(key, val) {
   updatePointsDisplay();
 };
 
+// ينظّف الكائن من أي قيم undefined التي يرفضها Firebase set()
+function sanitizeLog(log) {
+  const clean = {};
+  Object.keys(log).forEach(k => {
+    if (log[k] !== undefined) clean[k] = log[k];
+  });
+  return clean;
+}
+
 function saveToday() {
   const saveDate = viewingDate !== null ? viewingDate : todayStr();
   const month = saveDate.slice(0,7);
+  todayLog = sanitizeLog(todayLog);
+  pendingWrites++;
   db.ref(`logs/${currentUser}/${month}/${saveDate}`).set(todayLog)
-    .then(() => { showToast('تم الحفظ ✅'); /* bonuses removed per new rules */ })
-    .catch(() => showToast('خطأ في الحفظ ❌'));
+    .then(() => { showToast('تم الحفظ ✅'); })
+    .catch(() => showToast('خطأ في الحفظ ❌'))
+    .then(() => { pendingWrites = Math.max(0, pendingWrites - 1); });
 }
 
 // ═══ CALENDAR TAB ═══
