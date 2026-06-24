@@ -1257,23 +1257,23 @@ function shortArabicDate(dateStr) {
 // 2) flat dates:   logs/{user}/{YYYY-MM-DD}: { ... }
 function flattenUserLogs(userLogs) {
   if (!userLogs) return {};
-  const keys = Object.keys(userLogs);
-  if (keys.length === 0) return {};
-  // detect if first key is a month key like 2026-06
-  const first = keys[0];
-  if (/^\d{4}-\d{2}$/.test(first)) {
-    // month-grouped
-    const flat = {};
-    for (const month of Object.keys(userLogs)) {
-      const monthObj = userLogs[month] || {};
-      for (const day of Object.keys(monthObj)) {
-        flat[day] = monthObj[day];
+  // نصنّف كل مفتاح على حدة لأن بيانات المستخدم قد تكون مختلطة:
+  // مفاتيح قديمة مسطّحة بالتاريخ (2026-05-25) ومفاتيح شهرية جديدة (2026-06)
+  const flat = {};
+  for (const key of Object.keys(userLogs)) {
+    const val = userLogs[key];
+    if (!val || typeof val !== 'object') continue;
+    if (/^\d{4}-\d{2}$/.test(key)) {
+      // مفتاح شهري → كائن يحوي أيام بداخله
+      for (const day of Object.keys(val)) {
+        flat[day] = val[day];
       }
+    } else {
+      // مفتاح يوم مسطّح (سجل اليوم مباشرة)
+      flat[key] = val;
     }
-    return flat;
   }
-  // assume already flat with date keys
-  return userLogs;
+  return flat;
 }
 
 function calcTotalPointsForMonth(name, month) {
@@ -2213,7 +2213,7 @@ function renderLeaderboard() {
     return;
   }
   container.innerHTML = ranked.map((p, i) => {
-    const todayLog_ = (allLogs[p.name] || {})[todayStr()] || {};
+    const todayLog_ = flattenUserLogs(allLogs[p.name] || {})[todayStr()] || {};
     const todayBase = calcDayBase(todayLog_);
     const bonusTotal = calcTotalBonusPoints(p.name);
     const dailyTotal = p.total - bonusTotal;
