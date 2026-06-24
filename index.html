@@ -1260,17 +1260,20 @@ function flattenUserLogs(userLogs) {
   // نصنّف كل مفتاح على حدة لأن بيانات المستخدم قد تكون مختلطة:
   // مفاتيح قديمة مسطّحة بالتاريخ (2026-05-25) ومفاتيح شهرية جديدة (2026-06)
   const flat = {};
+  const monthKeys = [];
+  // المرحلة 1: المفاتيح المسطّحة القديمة (سجل اليوم مباشرة)
   for (const key of Object.keys(userLogs)) {
     const val = userLogs[key];
     if (!val || typeof val !== 'object') continue;
-    if (/^\d{4}-\d{2}$/.test(key)) {
-      // مفتاح شهري → كائن يحوي أيام بداخله
-      for (const day of Object.keys(val)) {
-        flat[day] = val[day];
-      }
-    } else {
-      // مفتاح يوم مسطّح (سجل اليوم مباشرة)
-      flat[key] = val;
+    if (/^\d{4}-\d{2}$/.test(key)) { monthKeys.push(key); continue; }
+    flat[key] = val; // مفتاح يوم مسطّح مثل 2026-05-25
+  }
+  // المرحلة 2: البكتات الشهرية الجديدة — تكتب فوق أي نسخة مسطّحة قديمة
+  // (هي صيغة الحفظ الحالية فتمثّل أحدث قيمة عند وجود تعارض لنفس اليوم)
+  for (const month of monthKeys) {
+    const monthObj = userLogs[month] || {};
+    for (const day of Object.keys(monthObj)) {
+      flat[day] = monthObj[day];
     }
   }
   return flat;
@@ -2034,6 +2037,10 @@ function saveToday() {
     .then(() => { showToast('تم الحفظ ✅'); })
     .catch(() => showToast('خطأ في الحفظ ❌'))
     .then(() => { pendingWrites = Math.max(0, pendingWrites - 1); });
+  // حذف أي نسخة مسطّحة قديمة لنفس اليوم لمنع تعارض النسخ المكرّرة
+  if (allLogs[currentUser] && allLogs[currentUser][saveDate] !== undefined) {
+    db.ref(`logs/${currentUser}/${saveDate}`).remove().catch(() => {});
+  }
 }
 
 // ═══ QADAA (الصلوات الفائتة) ═══
