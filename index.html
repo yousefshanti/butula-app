@@ -889,6 +889,34 @@ html, body {
   color: var(--text-dim);
 }
 .empty-state-icon { font-size: 48px; margin-bottom: 12px; }
+
+/* ═══ QADAA TAB ═══ */
+.qadaa-section-title {
+  font-size: 14px; color: var(--text-dim); font-weight: 700;
+  margin: 18px 0 10px;
+}
+.qadaa-item {
+  background: var(--surface);
+  border: 1px solid var(--green-light);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+}
+.qadaa-item.done { border-color: var(--green-bright); background: rgba(82,183,136,0.07); }
+.qadaa-item-info { flex: 1; min-width: 0; }
+.qadaa-prayer-name { font-size: 15px; font-weight: 700; color: var(--text); }
+.qadaa-item.done .qadaa-prayer-name { text-decoration: line-through; color: var(--text-dim); }
+.qadaa-date { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+.qadaa-btn {
+  border: 2px solid var(--green-bright); color: var(--green-bright);
+  background: transparent;
+  border-radius: 20px; padding: 7px 13px;
+  font-family: 'Tajawal', sans-serif; font-size: 13px; font-weight: 700;
+  cursor: pointer; white-space: nowrap; transition: all 0.2s; flex-shrink: 0;
+}
+.qadaa-btn:active { transform: scale(0.93); }
+.qadaa-btn.undo { border-color: var(--text-dim); color: var(--text-dim); }
 </style>
 </head>
 <body>
@@ -1078,6 +1106,15 @@ html, body {
       </button>
     </div>
 
+    <!-- QADAA TAB -->
+    <div class="tab" id="tab-qadaa">
+      <div class="today-header" style="margin-bottom:8px">
+        <div class="today-date">🕌 قضاء الصلوات الفائتة</div>
+        <div class="today-day">سجّل الصلوات التي قضيتها</div>
+      </div>
+      <div id="qadaa-content"></div>
+    </div>
+
     <!-- STATS TAB -->
     <div class="tab" id="tab-stats">
       <div id="stats-admin-select-row" class="select-row" style="display:none">
@@ -1100,6 +1137,10 @@ html, body {
     <button class="nav-item" onclick="window.switchTab('leaderboard',this)">
       <span class="nav-icon">🏆</span>
       <span>المتصدرون</span>
+    </button>
+    <button class="nav-item" onclick="window.switchTab('qadaa',this)">
+      <span class="nav-icon">🕌</span>
+      <span>القضاء</span>
     </button>
     <button class="nav-item" onclick="window.switchTab('stats',this)">
       <span class="nav-icon">📊</span>
@@ -1147,6 +1188,9 @@ const db = firebase.database();
 // ═══ CONSTANTS ═══
 const ADMIN_NAME = 'يوسف';
 const PRAYERS = ['الفجر','الظهر','العصر','المغرب','العشاء'];
+// مفاتيح إنجليزية للصلوات (نفس ترتيب PRAYERS) — تُستخدم في مفاتيح القضاء
+const PRAYER_KEYS = ['fajr','dhuhr','asr','maghrib','isha'];
+const PRAYER_KEY_NAME = { fajr:'الفجر', dhuhr:'الظهر', asr:'العصر', maghrib:'المغرب', isha:'العشاء' };
 const HABITS = [
   { key: 'prayers',       name: 'الصلوات الخمس (الفجر، الظهر، العصر، المغرب، العشاء)', emoji: '🕌', pts: 10, type: 'prayers' },
   { key: 'quran',         name: 'ورد القرآن الكريم',                        emoji: '📖', pts: 10, type: 'bool' },
@@ -1176,6 +1220,7 @@ let allLogs = {};
 let allParticipants = [];
 let allParticipantData = {};
 let allBonuses = {};
+let allQadaa = {};
 let todayLog = {};
 let lbUnsubscribe = null;
 let selectedLeaderboardMonth = `${new Date().getFullYear()}-${String(new Date().getMonth()+1).padStart(2,'0')}`;
@@ -1416,6 +1461,13 @@ async function checkAndAwardBonuses() {
   }
 }
 
+// لون شريط الالتزام: أخضر ≥70% ، أصفر ≥40% ، أحمر أقل
+function habitRateColor(pct) {
+  if (pct >= 70) return 'var(--green-bright)';
+  if (pct >= 40) return 'var(--yellow)';
+  return 'var(--red)';
+}
+
 function calcPerHabitRate(name) {
   const logs = flattenUserLogs(allLogs[name] || {});
   const dates = getChallengeDates().filter(d => d <= todayStr());
@@ -1482,6 +1534,11 @@ function startListeners() {
     refreshCurrentTab();
   });
 
+  db.ref('qadaa').on('value', snap => {
+    allQadaa = snap.val() || {};
+    refreshCurrentTab();
+  });
+
   // bonuses system removed — keep structure empty
   allBonuses = {};
 }
@@ -1494,6 +1551,7 @@ function refreshCurrentTab() {
   else if (id === 'calendar') renderCalendar();
   else if (id === 'leaderboard') renderLeaderboard();
   else if (id === 'stats') renderStats();
+  else if (id === 'qadaa') renderQadaa();
 }
 
 // ═══ LOGIN ═══
@@ -1760,6 +1818,7 @@ window.switchTab = function(tabId, btn) {
   else if (tabId === 'calendar') renderCalendar();
   else if (tabId === 'leaderboard') renderLeaderboard();
   else if (tabId === 'stats') renderStats();
+  else if (tabId === 'qadaa') renderQadaa();
 };
 
 // ═══ TODAY TAB ═══
@@ -1924,6 +1983,8 @@ window.setPrayerVal = function(idx, val) {
   // clicking same active button toggles it off → null
   todayLog.prayers[idx] = (todayLog.prayers[idx] === val) ? null : val;
   saveToday();
+  // مزامنة قائمة القضاء: "لا" → تُضاف للفائتة، غير ذلك → تُحذف
+  syncQadaaForPrayer(idx, todayLog.prayers[idx]);
   // update prayer row buttons
   const row = document.getElementById('prayer-row-'+idx);
   if (row) {
@@ -1973,6 +2034,94 @@ function saveToday() {
     .then(() => { showToast('تم الحفظ ✅'); })
     .catch(() => showToast('خطأ في الحفظ ❌'))
     .then(() => { pendingWrites = Math.max(0, pendingWrites - 1); });
+}
+
+// ═══ QADAA (الصلوات الفائتة) ═══
+// مفتاح القضاء = التاريخ + "_" + مفتاح الصلاة (مثال: 2026-06-24_fajr)
+// القيمة: false = فائتة ولم تُقضَ ، true = تم قضاؤها
+function syncQadaaForPrayer(idx, val) {
+  if (!currentUser) return;
+  const saveDate = viewingDate !== null ? viewingDate : todayStr();
+  const key = `${saveDate}_${PRAYER_KEYS[idx]}`;
+  const ref = db.ref(`qadaa/${currentUser}/${key}`);
+  if (val === false) {
+    // أُضيفت كصلاة فائتة — لا نلمسها إن كانت مقضية مسبقاً
+    const existing = (allQadaa[currentUser] || {})[key];
+    if (existing === undefined) ref.set(false).catch(() => {});
+  } else {
+    // "نعم" أو إلغاء التحديد → احذفها من قائمة الفائتة
+    ref.remove().catch(() => {});
+  }
+}
+
+window.markQadaa = function(key) {
+  if (!currentUser) return;
+  db.ref(`qadaa/${currentUser}/${key}`).set(true)
+    .then(() => showToast('تم تسجيل القضاء ✅'))
+    .catch(() => showToast('خطأ ❌'));
+};
+
+window.undoQadaa = function(key) {
+  if (!currentUser) return;
+  db.ref(`qadaa/${currentUser}/${key}`).set(false)
+    .then(() => showToast('أُعيدت إلى الفائتة'))
+    .catch(() => showToast('خطأ ❌'));
+};
+
+function renderQadaa() {
+  const container = document.getElementById('qadaa-content');
+  if (!container) return;
+  // الخصوصية: صلوات المستخدم الحالي فقط
+  const data = allQadaa[currentUser] || {};
+  const entries = Object.keys(data).map(key => {
+    const sep = key.indexOf('_');
+    const date = key.slice(0, sep);
+    const pkey = key.slice(sep + 1);
+    return { key, date, name: PRAYER_KEY_NAME[pkey] || pkey, done: data[key] === true };
+  });
+
+  const order = { fajr:0, dhuhr:1, asr:2, maghrib:3, isha:4 };
+  const sortFn = (a, b) => (a.date === b.date)
+    ? (order[a.key.slice(a.key.indexOf('_')+1)] ?? 0) - (order[b.key.slice(b.key.indexOf('_')+1)] ?? 0)
+    : a.date.localeCompare(b.date); // الأقدم أولاً للقضاء بالترتيب
+
+  const pending = entries.filter(e => !e.done).sort(sortFn);
+  const done = entries.filter(e => e.done).sort(sortFn);
+
+  let html = '';
+
+  if (!pending.length && !done.length) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🕌</div><div>لا توجد صلوات فائتة — أحسنت! 🤲</div></div>';
+    return;
+  }
+
+  if (pending.length) {
+    html += `<div class="qadaa-section-title">🕌 صلوات فائتة (${pending.length})</div>`;
+    html += pending.map(e => `
+      <div class="qadaa-item">
+        <div class="qadaa-item-info">
+          <div class="qadaa-prayer-name">صلاة ${e.name}</div>
+          <div class="qadaa-date">${toArabicDate(e.date)}</div>
+        </div>
+        <button class="qadaa-btn" onclick="window.markQadaa('${e.key}')">✅ قضيتها</button>
+      </div>`).join('');
+  } else {
+    html += '<div class="empty-state" style="padding:24px"><div class="empty-state-icon">🤲</div><div>لا توجد صلوات فائتة حالياً</div></div>';
+  }
+
+  if (done.length) {
+    html += `<div class="qadaa-section-title">✅ تم قضاؤها (${done.length})</div>`;
+    html += done.map(e => `
+      <div class="qadaa-item done">
+        <div class="qadaa-item-info">
+          <div class="qadaa-prayer-name">صلاة ${e.name}</div>
+          <div class="qadaa-date">${toArabicDate(e.date)}</div>
+        </div>
+        <button class="qadaa-btn undo" onclick="window.undoQadaa('${e.key}')">↩ تراجع</button>
+      </div>`).join('');
+  }
+
+  container.innerHTML = html;
 }
 
 // ═══ CALENDAR TAB ═══
@@ -2190,7 +2339,7 @@ window.renderStats = function() {
             <span>${h.emoji} ${h.name.split('(')[0].trim()}</span>
             <span class="habit-stat-pct">${habitRates[h.key]||0}%</span>
           </div>
-          <div class="habit-stat-bar"><div class="habit-stat-fill" style="width:${habitRates[h.key]||0}%"></div></div>
+          <div class="habit-stat-bar"><div class="habit-stat-fill" style="width:${habitRates[h.key]||0}%;background:${habitRateColor(habitRates[h.key]||0)}"></div></div>
         </div>
       `).join('')}
       ${TRACKING_ITEMS.map(t => `
