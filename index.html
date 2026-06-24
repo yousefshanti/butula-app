@@ -1810,7 +1810,7 @@ function renderToday() {
   document.getElementById('btn-prev-day').disabled = atStart;
   document.getElementById('btn-next-day').disabled = isToday;
 
-  const userLog = (allLogs[currentUser] || {})[dateToShow] || {};
+  const userLog = flattenUserLogs(allLogs[currentUser] || {})[dateToShow] || {};
   todayLog = JSON.parse(JSON.stringify(userLog));
   updatePointsDisplay();
   renderHabits();
