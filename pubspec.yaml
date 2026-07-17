@@ -1,0 +1,49 @@
+name: butula
+description: "البطولة — تطبيق تتبّع العادات الجماعي مع نظام نقاط وتقرير يومي معتمد ومتصدرين."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.12.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+
+  # State management
+  flutter_riverpod: ^2.6.1
+
+  # Firebase (all have verified iOS support)
+  firebase_core: ^3.8.0
+  firebase_auth: ^5.3.4
+  cloud_firestore: ^5.5.1
+
+  # Charts
+  fl_chart: ^0.69.2
+
+  # Local notifications + timezone
+  flutter_local_notifications: ^18.0.1
+  timezone: ^0.9.4
+  flutter_timezone: ^3.0.1
+
+  # UI / fonts / pickers
+  google_fonts: ^6.2.1
+  emoji_picker_flutter: ^3.1.0
+
+  # Utilities
+  intl: any
+  collection: ^1.18.0
+  shared_preferences: ^2.3.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+  generate: false

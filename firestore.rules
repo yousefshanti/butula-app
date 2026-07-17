@@ -1,0 +1,45 @@
+rules_version = '2';
+
+// Security rules for the "butula" app (Cloud Firestore only).
+// - Each user reads/writes ONLY their own data (users/{uid} subtree).
+// - The leaderboard is readable by any authenticated user, but each user may
+//   write only their own leaderboard document.
+// - Private tracking items live under users/{uid}/habits, which is owner-only,
+//   so they never leave the user's own subtree.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    // A user's own document and everything beneath it (habits, logs, reports).
+    match /users/{uid} {
+      allow read, write: if isOwner(uid);
+
+      match /{document=**} {
+        allow read, write: if isOwner(uid);
+      }
+    }
+
+    // Leaderboard: readable by all signed-in users; writable only by the owner.
+    match /leaderboard/{uid} {
+      allow read: if isSignedIn();
+      allow write: if isOwner(uid);
+    }
+
+    // Group chat (single shared room). Any signed-in user may read and may
+    // create a message only with their own uid. Messages are immutable:
+    // no edits or deletes (of your own or anyone else's).
+    match /chat/{messageId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn()
+                    && request.resource.data.senderUid == request.auth.uid;
+      allow update, delete: if false;
+    }
+  }
+}
