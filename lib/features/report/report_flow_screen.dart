@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -24,6 +26,7 @@ class ReportFlowScreen extends ConsumerStatefulWidget {
 class _ReportFlowScreenState extends ConsumerState<ReportFlowScreen> {
   late List<Habit> _daily;
   late List<ReportItem> _items;
+  // Binary answers: every item is YES/NO (default NO from the log).
   final Map<String, bool> _answers = {};
   DailyLog _log = const DailyLog(date: '');
   int _step = 0;
@@ -42,15 +45,14 @@ class _ReportFlowScreenState extends ConsumerState<ReportFlowScreen> {
     final svc = ref.read(firestoreServiceProvider);
     _log = (await svc?.getLog(widget.date)) ?? DailyLog.empty(widget.date);
 
-    Map<String, bool> initial;
+    Map<String, bool>? editAnswers;
     if (widget.isEdit) {
       final report = await svc?.getReport(widget.date);
-      initial = report?.answers ?? {};
-    } else {
-      initial = {}; // pre-fill from the log below
+      editAnswers = report?.answers;
     }
     for (final item in _items) {
-      _answers[item.key] = initial[item.key] ?? _log.isDone(item.key);
+      // Pre-fill from the report (when editing) or the day's log; default NO.
+      _answers[item.key] = editAnswers?[item.key] ?? _log.isDone(item.key);
     }
     if (mounted) setState(() => _ready = true);
   }
@@ -94,6 +96,10 @@ class _ReportFlowScreenState extends ConsumerState<ReportFlowScreen> {
       logUpdates = result.logUpdates;
     }
 
+    if (!mounted) return; // context may be stale after conflict resolution
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+
     setState(() => _submitting = true);
     final svc = ref.read(firestoreServiceProvider);
     final user = ref.read(appUserProvider).valueOrNull;
@@ -102,38 +108,61 @@ class _ReportFlowScreenState extends ConsumerState<ReportFlowScreen> {
       return;
     }
 
-    if (logUpdates.isNotEmpty) {
-      await svc.mergeLog(widget.date, logUpdates, markEdited: true);
-    }
-    await svc.certifyReport(
-      date: widget.date,
-      answers: Map<String, bool>.from(_answers),
-      totalPoints: _total,
-      userName: user.name,
-      isEdit: widget.isEdit,
-    );
-
-    // Reconcile qadaa from the certified prayer answers (No -> track missed).
-    for (final habit in _daily.where((h) => h.hasSubItems)) {
-      for (var i = 0; i < habit.subItems.length; i++) {
-        await svc.reconcilePrayerQadaa(
-          prayerKey: habit.subItems[i],
-          missedDate: widget.date,
-          done: _answers[habit.logKeys[i]] ?? false,
-        );
+    try {
+      if (logUpdates.isNotEmpty) {
+        await svc
+            .mergeLog(widget.date, logUpdates, markEdited: true)
+            .timeout(const Duration(seconds: 15));
       }
-    }
+      // Critical write. Bounded so a stalled connection surfaces an error
+      // instead of an infinite spinner.
+      await svc
+          .certifyReport(
+            date: widget.date,
+            answers: Map<String, bool>.from(_answers),
+            totalPoints: _total,
+            userName: user.name,
+            isEdit: widget.isEdit,
+          )
+          .timeout(const Duration(seconds: 20));
 
-    await NotificationService.instance.cancelTonight10pmReminder();
-
-    if (mounted) {
-      Navigator.of(context).pop();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('${s.reportCertified} — $_total/100'),
-          backgroundColor: BrandColors.success,
+      // Best-effort side effect — must never block or break the success UX.
+      // (Qadaa for missed prayers is settled at the 3AM day boundary.)
+      unawaited(
+        NotificationService.instance.cancelTonight10pmReminder().catchError(
+          (_) {},
         ),
       );
+
+      if (mounted) {
+        navigator.pop();
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text('${s.reportCertified} — $_total/100'),
+            backgroundColor: BrandColors.success,
+          ),
+        );
+      }
+    } on TimeoutException {
+      if (mounted) {
+        setState(() => _submitting = false);
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text(s.reportSlow),
+            backgroundColor: BrandColors.danger,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _submitting = false);
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text('${s.error}: $e'),
+            backgroundColor: BrandColors.danger,
+          ),
+        );
+      }
     }
   }
 
@@ -193,7 +222,7 @@ class _ReportFlowScreenState extends ConsumerState<ReportFlowScreen> {
                   label: s.no,
                   icon: Icons.close,
                   color: BrandColors.danger,
-                  selected: !current && _answers.containsKey(item.key),
+                  selected: !current,
                   onTap: () => _answer(false),
                 ),
               ),

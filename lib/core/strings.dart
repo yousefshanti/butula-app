@@ -107,12 +107,15 @@ class AppStrings {
   String get reportClosed => _t('نافذة التقرير مغلقة', 'Report window is closed');
   String get reportOpensIn => _t('تفتح خلال', 'Opens in');
   String get reportWindowInfo => _t(
-      'نافذة التقرير من 8:00 مساءً حتى 7:00 صباحًا بتوقيتك.',
-      'Report window is 8:00 PM to 7:00 AM in your local time.');
+      'نافذة التقرير من 8:00 مساءً حتى 3:00 فجرًا بتوقيتك.',
+      'Report window is 8:00 PM to 3:00 AM in your local time.');
   String get reviewAnswers => _t('راجع إجاباتك', 'Review your answers');
   String get finalTotal => _t('المجموع النهائي', 'Final total');
   String get reportCertified => _t('تم اعتماد التقرير', 'Report certified');
   String get reportLocked => _t('التقرير مقفل (تم استخدام التعديل الوحيد)', 'Report locked (single edit used)');
+  String get reportSlow => _t(
+      'تعذّر إتمام الاعتماد — تحقّق من اتصالك ثم أعد المحاولة.',
+      'Certification timed out — check your connection and try again.');
   String get editReport => _t('تعديل التقرير', 'Edit report');
   String get oneEditLeft => _t('يمكنك التعديل مرة واحدة فقط', 'You can edit once only');
   String get yes => _t('نعم', 'Yes');
@@ -146,6 +149,25 @@ class AppStrings {
   String get heatmap => _t('خريطة الأيام', 'Calendar heatmap');
   String get days => _t('يوم', 'days');
   String get noData => _t('لا توجد بيانات كافية بعد', 'Not enough data yet');
+
+  // Championships
+  String get championships => _t('البطولات', 'Championships');
+  String championshipTitle(int month, int year) =>
+      _t('بطولة شهر $month — $year', 'Championship $month/$year');
+  String get monthTotal => _t('مجموع الشهر', 'Month total');
+  String get pastChampionships => _t('البطولات السابقة', 'Past championships');
+  String get top10 => _t('أفضل 10', 'Top 10');
+  String get commitmentDoc => _t('وثيقة الالتزام', 'Commitment document');
+  String get commitmentCardSubtitle =>
+      _t('عهدك الشخصي — خاص بك وحدك', 'Your personal pledge — private to you');
+  String get commitmentEmpty =>
+      _t('لم تكتب وثيقة التزامك بعد', "You haven't written your commitment yet");
+  String get writeCommitment => _t('اكتب وثيقتك', 'Write your commitment');
+  String get commitmentHint => _t('اكتب التزامك هنا…', 'Write your commitment here…');
+  String get exportPdf => _t('تصدير PDF', 'Export PDF');
+  String writtenOnLabel(String d) => _t('حُرّرت في $d', 'Written on $d');
+  String editedOnLabel(String d) => _t('آخر تعديل $d', 'Edited $d');
+  String get noStandings => _t('لا نتائج لهذا الشهر بعد', 'No standings this month yet');
 
   // Leaderboard
   String get leaderboard => _t('المتصدرون', 'Leaderboard');
@@ -190,6 +212,23 @@ class AppStrings {
   String get english => _t('الإنجليزية', 'English');
   String get notifications => _t('الإشعارات', 'Notifications');
   String get account => _t('الحساب', 'Account');
+  String get exportData => _t('تصدير بياناتي', 'Export my data');
+  String get exportSubtitle => _t(
+      'ملف Excel بكل عاداتك وسجلّك وتقاريرك والقضاء',
+      'An Excel file with all your habits, logs, reports and qadaa');
+  String get exporting => _t('جارٍ تجهيز الملف…', 'Preparing your file…');
+  String get exportReady => _t('تم تجهيز الملف', 'File ready');
+  String get exportShareText => _t('بيانات تطبيق البطولة', 'My Al-Butula data');
+  String get exportError => _t('تعذّر تصدير البيانات', 'Could not export data');
+
+  // Update gate
+  String get updateTitle => _t('يتوفّر تحديث', 'Update available');
+  String get updateBody =>
+      _t('إصدار أحدث من التطبيق متوفّر.', 'A newer version of the app is available.');
+  String get updateRequiredBody => _t(
+      'يجب تحديث التطبيق للمتابعة.', 'You must update the app to continue.');
+  String get updateNow => _t('تحميل التحديث', 'Download update');
+  String get later => _t('لاحقًا', 'Later');
 
   // Generic
   String get loading => _t('جارٍ التحميل…', 'Loading…');

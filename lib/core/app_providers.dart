@@ -6,7 +6,9 @@ import 'package:timezone/timezone.dart' as tz;
 import '../models/app_user.dart';
 import '../models/daily_log.dart';
 import '../models/daily_report.dart';
+import '../models/championship_entry.dart';
 import '../models/chat_message.dart';
+import '../models/commitment.dart';
 import '../models/habit.dart';
 import '../models/leaderboard_entry.dart';
 import '../models/qadaa_entry.dart';
@@ -148,4 +150,25 @@ final leaderboardProvider = StreamProvider<List<LeaderboardEntry>>((ref) {
   final svc = ref.watch(firestoreServiceProvider);
   if (svc == null) return const Stream.empty();
   return svc.leaderboardStream();
+});
+
+// ---- Commitment document ----
+final commitmentProvider = StreamProvider<Commitment?>((ref) {
+  final svc = ref.watch(firestoreServiceProvider);
+  if (svc == null) return const Stream.empty();
+  return svc.commitmentStream();
+});
+
+// ---- Championships (monthly) ----
+final championshipMonthsProvider = StreamProvider<List<String>>((ref) {
+  final svc = ref.watch(firestoreServiceProvider);
+  if (svc == null) return const Stream.empty();
+  return svc.championshipMonthsStream();
+});
+
+final championshipEntriesProvider =
+    StreamProvider.family<List<ChampionshipEntry>, String>((ref, month) {
+  final svc = ref.watch(firestoreServiceProvider);
+  if (svc == null) return const Stream.empty();
+  return svc.championshipEntriesStream(month);
 });

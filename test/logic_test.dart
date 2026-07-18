@@ -1,5 +1,9 @@
+import 'package:butula/core/date_utils.dart';
 import 'package:butula/core/scoring.dart';
+import 'package:butula/models/app_version_config.dart';
 import 'package:butula/core/suggested_habits.dart';
+import 'package:butula/features/settings/data_export.dart';
+import 'package:butula/models/daily_report.dart';
 import 'package:butula/features/habits/habit_controller.dart';
 import 'package:butula/features/stats/stats_data.dart';
 import 'package:butula/models/chat_message.dart';
@@ -13,6 +17,54 @@ int _dailyTotal(List<Habit> hs) =>
     hs.where((h) => !h.isPrivate).fold(0, (a, h) => a + h.points);
 
 void main() {
+  group('Data export workbook', () {
+    test('has the four Arabic sheets, not the default, with header + rows', () {
+      final excel = buildExportWorkbook(
+        habits: [
+          const Habit(id: 'h1', name: 'قراءة', points: 20),
+          Habit(id: 'pr', name: 'الصلوات', points: 30, subItems: prayerNames),
+          const Habit(id: 'h2', name: 'محذوفة', points: 0, deleted: true),
+        ],
+        logs: [
+          const DailyLog(
+            date: '2026-07-17',
+            values: {'h1': true, 'pr::0': false},
+            editedLater: true,
+          ),
+        ],
+        reports: [
+          DailyReport(
+            date: '2026-07-17',
+            totalPoints: 62,
+            submittedAt: DateTime(2026, 7, 17, 21, 30),
+            editCount: 1,
+          ),
+        ],
+        qadaa: const [
+          QadaaEntry(id: 'q', prayerKey: 'الفجر', missedDate: '2026-07-17'),
+        ],
+      );
+
+      final names = excel.sheets.keys.toSet();
+      expect(names.contains(sheetHabits), true);
+      expect(names.contains(sheetLogs), true);
+      expect(names.contains(sheetReports), true);
+      expect(names.contains(sheetQadaa), true);
+      expect(names.contains('Sheet1'), false);
+
+      // Habits: header + 3 habit rows.
+      expect(excel.sheets[sheetHabits]!.maxRows, 4);
+      // Logs: header + 2 answered entries.
+      expect(excel.sheets[sheetLogs]!.maxRows, 3);
+      // Reports & qadaa: header + 1 row each.
+      expect(excel.sheets[sheetReports]!.maxRows, 2);
+      expect(excel.sheets[sheetQadaa]!.maxRows, 2);
+
+      // Saving produces bytes.
+      expect(excel.save(), isNotNull);
+    });
+  });
+
   group('Habit scoring', () {
     test('plain habit scores full points when done', () {
       const h = Habit(id: 'a', name: 'x', points: 20);
@@ -129,6 +181,62 @@ void main() {
       expect(stats.completionPct, 0);
       expect(stats.currentStreak, 0);
       expect(stats.longestStreak, 0);
+    });
+  });
+
+  group('App day boundary (3 AM)', () {
+    test('before 3 AM belongs to the previous calendar day', () {
+      // 1:30 AM on Jul 19 -> app-day Jul 18
+      expect(appDayKeyOf(DateTime(2026, 7, 19, 1, 30)), '2026-07-18');
+      // 2:59 AM -> still previous day
+      expect(appDayKeyOf(DateTime(2026, 7, 19, 2, 59)), '2026-07-18');
+    });
+
+    test('3 AM onward belongs to the current calendar day', () {
+      expect(appDayKeyOf(DateTime(2026, 7, 19, 3, 0)), '2026-07-19');
+      expect(appDayKeyOf(DateTime(2026, 7, 19, 12, 0)), '2026-07-19');
+      expect(appDayKeyOf(DateTime(2026, 7, 19, 23, 59)), '2026-07-19');
+    });
+  });
+
+  group('Date label + shift', () {
+    test('shiftDayKey moves across month boundaries', () {
+      expect(shiftDayKey('2026-07-31', 1), '2026-08-01');
+      expect(shiftDayKey('2026-08-01', -1), '2026-07-31');
+    });
+
+    test('Arabic day label uses weekday + Arabic-Indic day + month', () {
+      // 2026-07-17 is a Friday.
+      expect(dayLabel('2026-07-17', isArabic: true), 'الجمعة ١٧ يوليو');
+      expect(dayLabel('2026-07-17', isArabic: false), 'Friday 17 July');
+    });
+  });
+
+  group('Binary log', () {
+    test('absent or false key is not done; true key is done', () {
+      const log = DailyLog(date: '2026-07-18', values: {'a': true, 'b': false});
+      expect(log.isDone('a'), true);
+      expect(log.isDone('b'), false);
+      expect(log.isDone('c'), false); // absent -> No
+      expect(log.doneKeys, {'a'});
+    });
+  });
+
+  group('App version config', () {
+    test('parses fields with sane defaults', () {
+      final c = AppVersionConfig.fromMap({
+        'latestBuild': 5,
+        'apkUrl': 'https://example.com/app.apk',
+        'required': true,
+      });
+      expect(c.latestBuild, 5);
+      expect(c.apkUrl, 'https://example.com/app.apk');
+      expect(c.required, true);
+
+      final empty = AppVersionConfig.fromMap({});
+      expect(empty.latestBuild, 0);
+      expect(empty.apkUrl, '');
+      expect(empty.required, false);
     });
   });
 

@@ -12,10 +12,25 @@ DateTime parseDateKey(String key) {
   return DateTime(int.parse(p[0]), int.parse(p[1]), int.parse(p[2]));
 }
 
-const reportOpenHour = 20; // 8:00 PM
-const reportCloseHour = 7; // 7:00 AM next day
+/// The app's "day" starts at 3:00 AM local time (fixed, no prayer-time calc).
+/// e.g. at 1:30 AM on Jul 19 the app-day is still Jul 18.
+const appDayBoundaryHour = 3;
+const reportOpenHour = 20; // 8:00 PM — report window opens
+const reportCloseHour = appDayBoundaryHour; // 3:00 AM — window closes (day end)
 
-/// Resolves the current report window in a user's timezone.
+/// The app-day key for a given instant, applying the 3 AM boundary.
+String appDayKeyOf(DateTime instant) =>
+    dateKey(instant.subtract(const Duration(hours: appDayBoundaryHour)));
+
+/// The current app-day key in the user's timezone (used for daily logging).
+String todayKey(tz.Location location) =>
+    appDayKeyOf(tz.TZDateTime.now(location));
+
+/// The current app-month key (YYYY-MM), based on the app-day.
+String currentAppMonthKey(tz.Location location) =>
+    monthKeyOf(parseDateKey(todayKey(location)));
+
+/// Resolves the current report window (8:00 PM → 3:00 AM) in a user's timezone.
 class ReportWindow {
   ReportWindow._({
     required this.isOpen,
@@ -25,7 +40,7 @@ class ReportWindow {
 
   final bool isOpen;
 
-  /// The calendar day (YYYY-MM-DD) this window reports on. Always set.
+  /// The app-day (YYYY-MM-DD) this window reports on. Always set.
   final String reportDate;
 
   /// When the window next opens (used for the countdown when closed).
@@ -33,31 +48,19 @@ class ReportWindow {
 
   static ReportWindow now(tz.Location location) {
     final n = tz.TZDateTime.now(location);
-    final today = tz.TZDateTime(location, n.year, n.month, n.day);
-
-    if (n.hour >= reportOpenHour) {
-      // Evening: reporting for today, window open until 7AM tomorrow.
-      return ReportWindow._(
-        isOpen: true,
-        reportDate: dateKey(today),
-        opensAt: today.add(const Duration(hours: reportOpenHour)),
-      );
-    }
-    if (n.hour < reportCloseHour) {
-      // Early morning: still reporting for yesterday.
-      final yesterday = today.subtract(const Duration(days: 1));
-      return ReportWindow._(
-        isOpen: true,
-        reportDate: dateKey(yesterday),
-        opensAt: yesterday.add(const Duration(hours: reportOpenHour)),
-      );
-    }
-    // Daytime: closed. Next open is today 8PM (reports for today).
-    return ReportWindow._(
-      isOpen: false,
-      reportDate: dateKey(today),
-      opensAt: today.add(const Duration(hours: reportOpenHour)),
+    final appDay = appDayKeyOf(n);
+    final appDate = parseDateKey(appDay);
+    // 8:00 PM on the app-day's calendar date.
+    final opensAt = tz.TZDateTime(
+      location,
+      appDate.year,
+      appDate.month,
+      appDate.day,
+      reportOpenHour,
     );
+    // Open during 8PM..midnight and midnight..3AM (the tail of the app-day).
+    final isOpen = n.hour >= reportOpenHour || n.hour < appDayBoundaryHour;
+    return ReportWindow._(isOpen: isOpen, reportDate: appDay, opensAt: opensAt);
   }
 
   Duration untilOpen(tz.Location location) {
@@ -67,10 +70,45 @@ class ReportWindow {
   }
 }
 
-/// The date key for "today" in the user's timezone (for daily logging).
-String todayKey(tz.Location location) {
-  final n = tz.TZDateTime.now(location);
-  return dateKey(n);
+/// Shifts a YYYY-MM-DD key by [days].
+String shiftDayKey(String key, int days) =>
+    dateKey(parseDateKey(key).add(Duration(days: days)));
+
+const _arWeekdays = [
+  'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت', 'الأحد',
+];
+const _arMonths = [
+  'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
+  'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر',
+];
+const _enWeekdays = [
+  'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday',
+];
+const _enMonths = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
+];
+
+String _toArabicDigits(String s) => s.replaceAllMapped(
+    RegExp(r'[0-9]'), (m) => '٠١٢٣٤٥٦٧٨٩'[int.parse(m[0]!)]);
+
+/// A friendly weekday + day + month label, e.g. "الجمعة ١٧ يوليو".
+String dayLabel(String key, {required bool isArabic}) {
+  final d = parseDateKey(key);
+  if (isArabic) {
+    return '${_arWeekdays[d.weekday - 1]} '
+        '${_toArabicDigits(d.day.toString())} ${_arMonths[d.month - 1]}';
+  }
+  return '${_enWeekdays[d.weekday - 1]} ${d.day} ${_enMonths[d.month - 1]}';
+}
+
+/// A long date, e.g. "١٧ يوليو ٢٠٢٦" (Arabic) or "17 July 2026" (English).
+String longDate(DateTime d, {required bool isArabic}) {
+  if (isArabic) {
+    return '${_toArabicDigits(d.day.toString())} ${_arMonths[d.month - 1]} '
+        '${_toArabicDigits(d.year.toString())}';
+  }
+  return '${d.day} ${_enMonths[d.month - 1]} ${d.year}';
 }
 
 String formatDuration(Duration d) {

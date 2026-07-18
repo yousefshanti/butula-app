@@ -1,4 +1,5 @@
 /// A single day's habit log. Keys are habit log-keys (habitId or "habitId::i").
+/// Binary model: a key that is absent or false counts as "not done".
 class DailyLog {
   const DailyLog({
     required this.date,

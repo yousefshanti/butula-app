@@ -9,6 +9,7 @@ import '../habits/emoji_icon_picker.dart';
 import '../qadaa/qadaa_screen.dart';
 
 /// A single habit's yes/no toggle for a given day, with a point-flash animation.
+/// Binary model: default is NO (unchecked); tapping toggles YES/NO.
 class HabitCheckTile extends ConsumerStatefulWidget {
   const HabitCheckTile({
     super.key,
@@ -162,7 +163,7 @@ class _PointFlash extends StatelessWidget {
   }
 }
 
-/// The five prayers, shown as a card with 5 sub-item toggles.
+/// The five prayers, shown as a card with 5 binary sub-item toggles.
 class PrayerCheckCard extends ConsumerWidget {
   const PrayerCheckCard({
     super.key,
@@ -219,24 +220,24 @@ class PrayerCheckCard extends ConsumerWidget {
             const Divider(height: 16),
             ...List.generate(keys.length, (i) {
               final key = keys[i];
+              final prayerName = habit.subItems[i];
               final done = log.isDone(key);
               return CheckboxListTile(
                 dense: true,
                 contentPadding: EdgeInsets.zero,
                 controlAffinity: ListTileControlAffinity.trailing,
                 value: done,
-                title: Text(habit.subItems[i]),
+                title: Text(prayerName),
                 onChanged: (v) {
                   final value = v ?? false;
                   final svc = ref.read(firestoreServiceProvider);
                   if (svc == null) return;
                   svc.setLogValue(date, key, value, markEdited: isPast);
-                  // Track missed prayers for qadaa (No -> add, Yes -> remove).
-                  svc.reconcilePrayerQadaa(
-                    prayerKey: habit.subItems[i],
-                    missedDate: date,
-                    done: value,
-                  );
+                  // Flipping a prayer to YES clears any pending qadaa entry.
+                  // Missed prayers are added at the 3AM day-end settlement.
+                  if (value) {
+                    svc.removePendingMissedPrayer(prayerName, date);
+                  }
                 },
               );
             }),

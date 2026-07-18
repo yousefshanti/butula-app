@@ -71,6 +71,7 @@ class Habit {
     this.isPrivate = false,
     this.order = 0,
     this.subItems = const [],
+    this.deleted = false,
   });
 
   final String id;
@@ -93,6 +94,10 @@ class Habit {
 
   /// Named sub-items (e.g. the five prayers). Empty for a normal habit.
   final List<String> subItems;
+
+  /// Soft-delete flag: kept in Firestore so history/export survives deletion,
+  /// but filtered out of the active habit list everywhere in the app.
+  final bool deleted;
 
   bool get hasSubItems => subItems.isNotEmpty;
   bool get isDaily => type == HabitType.daily;
@@ -130,6 +135,7 @@ class Habit {
     bool? isPrivate,
     int? order,
     List<String>? subItems,
+    bool? deleted,
   }) =>
       Habit(
         id: id ?? this.id,
@@ -145,6 +151,7 @@ class Habit {
         isPrivate: isPrivate ?? this.isPrivate,
         order: order ?? this.order,
         subItems: subItems ?? this.subItems,
+        deleted: deleted ?? this.deleted,
       );
 
   Map<String, dynamic> toMap() => {
@@ -159,6 +166,7 @@ class Habit {
         'isPrivate': isPrivate,
         'order': order,
         'subItems': subItems,
+        'deleted': deleted,
       };
 
   factory Habit.fromMap(String id, Map<String, dynamic> m) => Habit(
@@ -176,6 +184,7 @@ class Habit {
         order: (m['order'] as num?)?.toInt() ?? 0,
         subItems: (m['subItems'] as List?)?.map((e) => e.toString()).toList() ??
             const [],
+        deleted: (m['deleted'] as bool?) ?? false,
       );
 }
 

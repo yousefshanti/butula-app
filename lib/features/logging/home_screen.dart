@@ -14,16 +14,25 @@ import '../habits/habits_screen.dart';
 import 'calendar_screen.dart';
 import 'habit_check_tile.dart';
 
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  String? _selectedDate; // app-day key; null = follow today
+
+  @override
+  Widget build(BuildContext context) {
     final s = ref.watch(stringsProvider);
     final loc = ref.watch(tzLocationProvider);
     final today = todayKey(loc);
+    final selected = _selectedDate ?? today;
+    final isToday = selected == today;
     final habitsAsync = ref.watch(habitsProvider);
-    final logAsync = ref.watch(logProvider(today));
+    final logAsync = ref.watch(logProvider(selected));
     final dailyTotal = ref.watch(dailyPointsTotalProvider);
 
     return Scaffold(
@@ -51,37 +60,58 @@ class HomeScreen extends ConsumerWidget {
         error: (e, _) => Center(child: Text('${s.error}\n$e')),
         data: (habits) {
           if (habits.isEmpty) return _EmptyHome(s: s);
-          final log = logAsync.valueOrNull ?? DailyLog.empty(today);
+          final log = logAsync.valueOrNull ?? DailyLog.empty(selected);
           final daily = habits.where((h) => h.isDaily).toList();
           final weekly = habits.where((h) => h.type == HabitType.weekly).toList();
           final monthly =
               habits.where((h) => h.type == HabitType.monthly).toList();
           final score = dailyScore(daily, log.doneKeys);
 
-          return ListView(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
+          return Column(
             children: [
-              _ScoreHeader(score: score),
-              if (dailyTotal != 100)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: PointsWarningBanner(
-                    total: dailyTotal,
-                    onAutoDistribute: () => ref
-                        .read(habitControllerProvider)
-                        .applyAutoDistribute(),
-                  ),
+              _DateBar(
+                dateKeyValue: selected,
+                isArabic: s.isArabic,
+                canGoForward: !isToday,
+                onPrev: () =>
+                    setState(() => _selectedDate = shiftDayKey(selected, -1)),
+                onNext: isToday
+                    ? null
+                    : () {
+                        final next = shiftDayKey(selected, 1);
+                        setState(() =>
+                            _selectedDate = next == today ? null : next);
+                      },
+              ),
+              Expanded(
+                child: ListView(
+                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 32),
+                  children: [
+                    _ScoreHeader(score: score),
+                    if (dailyTotal != 100)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: PointsWarningBanner(
+                          total: dailyTotal,
+                          onAutoDistribute: () => ref
+                              .read(habitControllerProvider)
+                              .applyAutoDistribute(),
+                        ),
+                      ),
+                    const SizedBox(height: 8),
+                    ...daily.map((h) => _tileFor(h, selected, log, !isToday)),
+                    if (weekly.isNotEmpty) ...[
+                      _sectionHeader(context, s.weekly),
+                      ...weekly.map((h) => _tileFor(h, selected, log, !isToday)),
+                    ],
+                    if (monthly.isNotEmpty) ...[
+                      _sectionHeader(context, s.monthly),
+                      ...monthly
+                          .map((h) => _tileFor(h, selected, log, !isToday)),
+                    ],
+                  ],
                 ),
-              const SizedBox(height: 8),
-              ...daily.map((h) => _tileFor(h, today, log)),
-              if (weekly.isNotEmpty) ...[
-                _sectionHeader(context, s.weekly),
-                ...weekly.map((h) => _tileFor(h, today, log)),
-              ],
-              if (monthly.isNotEmpty) ...[
-                _sectionHeader(context, s.monthly),
-                ...monthly.map((h) => _tileFor(h, today, log)),
-              ],
+              ),
             ],
           );
         },
@@ -89,11 +119,11 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  Widget _tileFor(Habit h, String date, DailyLog log) {
+  Widget _tileFor(Habit h, String date, DailyLog log, bool isPast) {
     if (h.hasSubItems) {
-      return PrayerCheckCard(habit: h, date: date, log: log);
+      return PrayerCheckCard(habit: h, date: date, log: log, isPast: isPast);
     }
-    return HabitCheckTile(habit: h, date: date, log: log);
+    return HabitCheckTile(habit: h, date: date, log: log, isPast: isPast);
   }
 
   Widget _sectionHeader(BuildContext context, String title) => Padding(
@@ -102,6 +132,55 @@ class HomeScreen extends ConsumerWidget {
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
                 color: BrandColors.green, fontWeight: FontWeight.bold)),
       );
+}
+
+/// Subtle date bar with day name + prev/next arrows (next capped at today).
+class _DateBar extends StatelessWidget {
+  const _DateBar({
+    required this.dateKeyValue,
+    required this.isArabic,
+    required this.canGoForward,
+    required this.onPrev,
+    required this.onNext,
+  });
+
+  final String dateKeyValue;
+  final bool isArabic;
+  final bool canGoForward;
+  final VoidCallback onPrev;
+  final VoidCallback? onNext;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          IconButton(
+            icon: const Icon(Icons.chevron_right),
+            tooltip: 'اليوم السابق',
+            onPressed: onPrev,
+          ),
+          Flexible(
+            child: Text(
+              dayLabel(dateKeyValue, isArabic: isArabic),
+              style: theme.textTheme.titleSmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.chevron_left),
+            tooltip: 'اليوم التالي',
+            onPressed: onNext,
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _ScoreHeader extends StatelessWidget {

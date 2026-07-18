@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../core/app_providers.dart';
 import '../../core/settings_controller.dart';
+import '../../core/strings.dart';
 import '../../core/theme.dart';
 import '../../services/notification_service.dart';
 import '../auth/timezone_setup_screen.dart';
 import '../habits/habits_screen.dart';
 import '../qadaa/qadaa_screen.dart';
+import 'data_export.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -153,6 +156,13 @@ class SettingsScreen extends ConsumerWidget {
             ),
           ),
           ListTile(
+            leading: const Icon(Icons.download_outlined),
+            title: Text(s.exportData),
+            subtitle: Text(s.exportSubtitle),
+            trailing: const Icon(Icons.chevron_left),
+            onTap: () => _exportData(context, ref, s),
+          ),
+          ListTile(
             leading: const Icon(Icons.public),
             title: Text(s.timezone),
             subtitle: Text(user?.timezone ?? ''),
@@ -180,6 +190,63 @@ class SettingsScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _exportData(
+      BuildContext context, WidgetRef ref, AppStrings s) async {
+    final svc = ref.read(firestoreServiceProvider);
+    if (svc == null) return;
+    final messenger = ScaffoldMessenger.of(context);
+    final dialogNav = Navigator.of(context, rootNavigator: true);
+    // Anchor for the iPad share popover (ignored on other platforms).
+    final box = context.findRenderObject() as RenderBox?;
+    final origin = box != null
+        ? box.localToGlobal(Offset.zero) & box.size
+        : const Rect.fromLTWH(0, 0, 1, 1);
+
+    // Non-dismissible loading indicator (bounded by a timeout below).
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => Dialog(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const CircularProgressIndicator(),
+              const SizedBox(width: 20),
+              Flexible(child: Text(s.exporting)),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    try {
+      final file =
+          await exportUserDataToXlsx(svc).timeout(const Duration(seconds: 60));
+      dialogNav.pop(); // close the loading dialog
+      await Share.shareXFiles(
+        [
+          XFile(
+            file.path,
+            mimeType:
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          ),
+        ],
+        text: s.exportShareText,
+        sharePositionOrigin: origin,
+      );
+    } catch (e) {
+      dialogNav.pop();
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('${s.exportError}: $e'),
+          backgroundColor: BrandColors.danger,
+        ),
+      );
+    }
   }
 
   Widget _sectionTitle(BuildContext context, String title) => Padding(

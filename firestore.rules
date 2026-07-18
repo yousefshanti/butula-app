@@ -41,5 +41,27 @@ service cloud.firestore {
                     && request.resource.data.senderUid == request.auth.uid;
       allow update, delete: if false;
     }
+
+    // Monthly championships. Marker doc championships/{YYYY-MM} + one entry per
+    // user. Readable by all signed-in users; each user writes only their own
+    // entry. The marker may be created by any signed-in user (first certify of
+    // the month) but never edited/deleted.
+    match /championships/{month} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update, delete: if false;
+
+      match /entries/{uid} {
+        allow read: if isSignedIn();
+        allow write: if isOwner(uid);
+      }
+    }
+
+    // App config (version gate). Read-only for clients; written from the
+    // Firebase console by the maintainer.
+    match /app_config/{doc} {
+      allow read: if isSignedIn();
+      allow write: if false;
+    }
   }
 }

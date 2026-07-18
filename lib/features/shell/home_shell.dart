@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/app_providers.dart';
+import '../../core/date_utils.dart';
 import '../../core/settings_controller.dart';
+import '../../models/habit.dart';
 import '../../services/notification_service.dart';
+import '../championships/championships_screen.dart';
 import '../chat/chat_screen.dart';
-import '../leaderboard/leaderboard_screen.dart';
 import '../logging/home_screen.dart';
+import '../update/version_check.dart';
 import '../report/report_screen.dart';
 import '../settings/settings_screen.dart';
 import '../stats/stats_screen.dart';
@@ -25,7 +28,7 @@ class _HomeShellState extends ConsumerState<HomeShell> {
     HomeScreen(),
     ReportScreen(),
     StatsScreen(),
-    LeaderboardScreen(),
+    ChampionshipsScreen(),
     ChatScreen(),
     SettingsScreen(),
   ];
@@ -42,10 +45,30 @@ class _HomeShellState extends ConsumerState<HomeShell> {
       await NotificationService.instance.requestPermissions();
       await prefs.setBool('permissionAsked', true);
     }
-    // Keep reminders in sync with the user's habits + timezone.
+    // Wait for the habit list (from cache/server) before syncing reminders and
+    // settling qadaa, so both act on real data.
+    List<Habit> habits = const [];
+    try {
+      habits = await ref
+          .read(habitsProvider.future)
+          .timeout(const Duration(seconds: 10));
+    } catch (_) {
+      habits = ref.read(habitsProvider).valueOrNull ?? const [];
+    }
     final tzName = ref.read(appUserProvider).valueOrNull?.timezone;
-    final habits = ref.read(habitsProvider).valueOrNull ?? const [];
     await NotificationService.instance.syncAll(habits, tzName);
+
+    // Settle missed prayers for any ended app-day not yet processed.
+    try {
+      final svc = ref.read(firestoreServiceProvider);
+      final loc = ref.read(tzLocationProvider);
+      await svc?.settleQadaa(habits: habits, currentAppDay: todayKey(loc));
+    } catch (_) {
+      // Best-effort — retries next launch.
+    }
+
+    // Fallback version gate for full-APK updates (Shorebird handles Dart-only).
+    if (mounted) await checkForUpdate(context, ref);
   }
 
   @override
@@ -75,9 +98,9 @@ class _HomeShellState extends ConsumerState<HomeShell> {
             label: s.navStats,
           ),
           NavigationDestination(
-            icon: const Icon(Icons.leaderboard_outlined),
-            selectedIcon: const Icon(Icons.leaderboard),
-            label: s.navLeaderboard,
+            icon: const Icon(Icons.emoji_events_outlined),
+            selectedIcon: const Icon(Icons.emoji_events),
+            label: s.championships,
           ),
           NavigationDestination(
             icon: Badge(
