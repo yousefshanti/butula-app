@@ -18,13 +18,21 @@ class RootGate extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final auth = ref.watch(authStateProvider);
 
+    // Only show the login screen when we are CERTAIN there is no session:
+    // both the auth stream value AND FirebaseAuth.currentUser are null.
+    // This guards against a transient null (or error) from authStateChanges()
+    // at cold start bouncing a restored session to the login screen.
+    // currentUser is used only as a positive "keep the session" signal — never
+    // to route *to* login — and is reliable after Firebase.initializeApp().
+    bool hasSession(bool streamHasUser) =>
+        streamHasUser || ref.read(authServiceProvider).currentUser != null;
+
     return auth.when(
       loading: () => const _Splash(),
-      error: (_, _) => const LoginScreen(),
-      data: (user) {
-        if (user == null) return const LoginScreen();
-        return const _SignedInGate();
-      },
+      error: (_, _) =>
+          hasSession(false) ? const _SignedInGate() : const LoginScreen(),
+      data: (user) =>
+          hasSession(user != null) ? const _SignedInGate() : const LoginScreen(),
     );
   }
 }

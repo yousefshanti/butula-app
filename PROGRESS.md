@@ -327,3 +327,24 @@ placeholder found anywhere. `CFBundleName` stays `butula` (internal only).
 pubspec description already carries the Arabic tagline; no web/ metadata exists.
 Bumped version to **1.0.1+2** (icon = native change, needs a new Shorebird
 release, not a patch) and rebuilt the Shorebird release APK.
+
+## Bug fix — login session not persisting across restarts — 2026-07-18
+### Root cause
+`RootGate` routed to `LoginScreen` whenever `authStateProvider` emitted
+`data(null)` OR `error`. FlutterFire's `authStateChanges()` can emit a transient
+`null` (or a transient stream error) at cold start before the persisted session
+is restored, so a logged-in user was bounced to the login screen even though
+`FirebaseAuth.instance.currentUser` was the restored user. (Auth timing was
+otherwise correct — stream-based, splash on loading; no accidental signOut; the
+user-doc error path already avoided logging out.)
+### Fix
+`root_gate.dart` now shows `LoginScreen` only when we are CERTAIN there is no
+session: the stream value AND `FirebaseAuth.currentUser` are both null. A
+transient null/error can no longer bounce a restored session; `currentUser` is
+used only as a positive "keep the session" guard (never to route *to* login) and
+is reliable after `await Firebase.initializeApp()`. Offline restart still shows
+the logged-in state (auth persists offline; the user doc serves from cache), and
+transient user-doc read failures show the retry screen without signing out.
+Dart-only fix → shipped as a Shorebird patch on release 1.0.1+2.
+Could not device-test the login→kill→reopen (and airplane-mode) flow here (no
+emulator/device); verified by code inspection + analyze + tests (22/22).
