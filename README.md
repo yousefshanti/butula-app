@@ -1,218 +1,203 @@
-# البطولة (Al-Butula) 🏆
+# Al-Butula (البطولة) 🏆
 
-تطبيق تتبّع العادات الجماعي مع نظام نقاط مخصّص، وتقرير يومي معتمد، ولوحة متصدرين حيّة.
-مبني بـ **Flutter/Dart** ويعمل على **Android و iOS** من نفس الكود.
-
----
-
-## المزايا الرئيسية
-
-- **حسابات**: تسجيل بالبريد وكلمة المرور، واختيار المنطقة الزمنية عند أول دخول.
-- **بناء العادات**: كل مستخدم يبني جدوله من الصفر (اسم، إيموجي/أيقونة، نقاط، نوع يومي/أسبوعي/شهري).
-- **قاعدة الـ100 نقطة**: مجموع نقاط العادات اليومية يجب أن يساوي 100 تمامًا (مع شريط مباشر وزر توزيع تلقائي).
-- **التسجيل اليومي**: تفعيل/إلغاء لكل عادة، الصلوات الخمس كخمسة عناصر منفصلة، حفظ فوري، وتقويم لتعديل الأيام السابقة.
-- **التقرير المعتمد**: نافذة من 8 مساءً حتى 7 صباحًا بتوقيت المستخدم، مع كشف التعارض مع سجل اليوم، وتعديل واحد مسموح.
-- **الإشعارات**: تذكير التقرير 8م + 10م، وتذكيرات اختيارية لكل عادة (محلية، تعمل بدون إنترنت).
-- **الإحصائيات**: رسوم بيانية لكل عادة + إحصائيات عامة وخريطة حرارية شهرية.
-- **المتصدرون**: ترتيب حسب النقاط المعتمدة مع تحديث حيّ وفلترة (هذا الشهر / كل الوقت).
-- **قضاء الصلاة**: تتبّع الصلوات الفائتة تلقائيًا وقضاؤها (شخصي بالكامل).
-- **المحادثة**: غرفة دردشة جماعية واحدة لكل المستخدمين، فورية بدون إشعارات دفع.
-- **تصدير بياناتي**: ملف Excel بأربع أوراق (العادات، السجل اليومي، التقارير، القضاء).
+A group habit-tracking app with a custom points system, a certified daily report,
+and a live monthly championship. Built with **Flutter/Dart**, running on **Android
+and iOS** from one codebase. The app UI itself is Arabic-first (RTL) with English
+support.
 
 ---
 
-## قضاء الصلاة (Qadaa) والمحادثة (Chat)
+## Features
 
-### قضاء الصلاة 🕌
-- عند تسجيل «لا» لأي من الصلوات الخمس (في التسجيل اليومي أو عبر التقرير المعتمد)،
-  تُضاف تلك الصلاة تلقائيًا إلى **قائمة القضاء**.
-- شاشة القضاء (من قسم الصلوات أو الإعدادات) تعرض الصلوات الفائتة مجمّعة حسب النوع
-  مع العدد والتواريخ، وزر **«قضيتها»** لنقلها إلى سجل المقضيّة.
-- إذا عدّلت لاحقًا يومًا سابقًا وغيّرت صلاة من «لا» إلى «نعم»، تُحذف تلقائيًا من
-  القائمة (لكن لا تُحذف الصلوات التي سبق أن قُضيت).
-- **لا يؤثّر القضاء على النقاط ولا على المتصدرين** — تتبّع شخصي خاص بك فقط.
-- التخزين: `users/{uid}/qadaa/{autoId}` — ضمن نطاقك الخاص فقط (قواعد المالك).
-
-### المحادثة الجماعية 💬
-- غرفة واحدة مشتركة لكل المستخدمين، رسائل نصية فقط، فورية (Firestore realtime).
-- تحميل أحدث 50 رسالة مع «تحميل المزيد» عند التمرير للأعلى.
-- شارة **غير المقروء** على تبويب المحادثة (تعتمد على `chatLastReadAt` لكل مستخدم).
-- بدون إشعارات دفع (لا Cloud Functions) — كل شيء داخل التطبيق مباشرة.
-- التخزين: `chat/{autoId}` — يقرأها كل مستخدم مسجّل، ويكتب كلٌّ رسائله فقط باسم
-  `uid` الخاص به، ولا تعديل/حذف للرسائل.
-
-> **مهم:** أضفنا قواعد أمان جديدة لمجموعة `chat` في `firestore.rules`. أعد نشرها مرة
-> واحدة عبر: `firebase deploy --only firestore:rules`. تُنشأ مجموعة `chat` تلقائيًا
-> عند إرسال أول رسالة — لا حاجة لأي خطوة يدوية في وحدة تحكّم Firebase.
-
-### تصدير بياناتي (Export) 📤
-- من **الإعدادات → تصدير بياناتي** يُنشأ ملف Excel (`.xlsx`) بأربع أوراق منفصلة
-  بالعربية: **العادات، السجل اليومي، التقارير المعتمدة، القضاء** — كلها بيانات
-  المستخدم نفسه فقط، والتواريخ بصيغة YYYY-MM-DD.
-- يُشارك الملف عبر `share_plus` (حفظ في الملفات، واتساب، بريد…) على أندرويد و iOS.
-- مؤشّر تحميل أثناء التجهيز، ورسالة خطأ واضحة عند الفشل (بلا تعليق).
-- حذف العادة أصبح **حذفًا ناعمًا** (تبقى في التصدير بوسم «محذوفة») للحفاظ على السجل.
+- **Accounts**: email/password sign-up; timezone chosen on first login.
+- **Habit builder**: each user builds their own table from scratch (name,
+  emoji/icon, points, type: daily/weekly/monthly).
+- **The 100-point rule**: daily habit points must total exactly 100 (live bar +
+  auto-distribute button).
+- **Daily logging**: yes/no per habit (binary; default No), the five prayers as
+  five separate items, instant save, and a calendar for editing past days.
+- **App day boundary at 3:00 AM**: the app-day runs 3 AM → 3 AM local time; this
+  applies to the today screen, logs, score, reports, stats, streaks, and qadaa.
+- **Certified report**: window 8:00 PM → 3:00 AM (user's timezone) with a
+  countdown, conflict detection against the day's log, and one allowed edit.
+- **Notifications**: report reminders at 8 PM + 10 PM, plus optional per-habit
+  reminders (all local, work offline).
+- **Statistics**: per-habit charts + general stats and a monthly heatmap.
+- **Championships**: monthly standings (current month + a top-10 archive of past
+  months), computed from certified reports.
+- **Prayer Qadaa**: missed prayers are tracked automatically at day end and can
+  be marked as made up (fully private).
+- **Group chat**: one shared realtime room for all users (no push notifications).
+- **Export my data**: an Excel file with four sheets (habits, daily logs,
+  certified reports, qadaa).
+- **Commitment document**: a private personal pledge with a formal PDF export.
 
 ---
 
-## التحديثات عبر الهواء (Shorebird)
+## Over-the-air updates (Shorebird)
 
-التطبيق مُهيّأ لـ **Shorebird code push** لإرسال تحديثات Dart دون توزيع APK جديد.
-(`shorebird.yaml` موجود، و`app_id` مُنشأ.)
+The app is configured for **Shorebird code push** to ship Dart-level updates
+without redistributing an APK (`shorebird.yaml` is present; `app_id` is created).
 
 ```bash
-# تأكّد أنك مسجّل الدخول
-shorebird login          # مرة واحدة
+shorebird login          # once
 
-# إنشاء إصدار جديد قابل للترقيع (هذا هو الـ APK الذي ترسله لأصدقائك)
+# Create a new patchable release (this is the APK you send to friends)
 shorebird release android --artifact apk
-# الناتج: build/app/outputs/apk/release/app-release.apk
+# Output: build/app/outputs/flutter-apk/app-release.apk
 
-# دفع تحديث (patch) للمستخدمين على آخر إصدار — بدون APK جديد
+# Push a Dart-only update to users on the latest release — no new APK
 shorebird patch android
 ```
 
-**ما الذي يمكن إرساله كـ patch؟** أي تغيير في كود Dart (منطق، واجهات، نصوص،
-إصلاحات). يصل تلقائيًا عند فتح التطبيق (auto_update).
+**What can ship as a patch?** Any Dart code change (logic, UI, text, fixes). It
+applies automatically on app launch (auto_update).
 
-**ما الذي يتطلّب APK جديدًا (إصدار كامل)؟** تغييرات الجزء الأصلي: إضافة/تحديث
-إضافات (plugins) فيها كود أصلي، تغيير الأذونات أو إعدادات Gradle/Manifest، رفع
-إصدار Flutter، أو تغيير أيقونة/اسم التطبيق. في هذه الحالات:
-`shorebird release android --artifact apk` ثم وزّع الـ APK الجديد.
+**What needs a full new APK?** Native changes: adding/updating plugins with
+native code, permission or Gradle/Manifest changes, bumping the Flutter version,
+or changing the app icon/name. In those cases run
+`shorebird release android --artifact apk` and distribute the new APK.
 
-### بوابة الإصدار داخل التطبيق (احتياطية)
-لحالات الـ APK الكامل: عند بدء التشغيل يقرأ التطبيق `app_config/version` من
-Firestore:
+### In-app version gate (fallback)
+For full-APK updates, on startup the app reads `app_config/version` from Firestore:
 
 ```
-app_config/version: { latestBuild: <رقم>, apkUrl: "<رابط تحميل>", required: <bool> }
+app_config/version: { latestBuild: <int>, apkUrl: "<download url>", required: <bool> }
 ```
 
-إذا كان الإصدار المثبّت أقدم من `latestBuild`، يظهر تنبيه عربي برابط التحميل
-(قابل للتجاهل إلا إذا كان `required: true`). حرّر هذا المستند يدويًا من وحدة تحكّم
-Firebase عند نشر APK جديد. (القاعدة: قراءة فقط للمستخدمين المسجّلين.)
+If the installed build is older than `latestBuild`, an Arabic dialog with a
+download link appears (dismissible unless `required: true`). Edit this document
+by hand in the Firebase console when you publish a new APK. (Rule: read-only for
+signed-in users.)
 
 ---
 
-## المتطلبات
+## Requirements
 
-- Flutter 3.44 أو أحدث، وDart 3.12+
-- **JDK 17** (إلزامي لبناء Android). إن لم يكن مضبوطًا:
+- Flutter 3.44+ and Dart 3.12+
+- **JDK 17** (required to build Android). If it isn't configured:
   ```bash
   flutter config --jdk-dir "$(brew --prefix openjdk@17)/libexec/openjdk.jdk/Contents/Home"
   ```
-- Android SDK (platform-tools + android-36 + build-tools؛ minSdk = 23+)
-- لبناء iOS: جهاز Mac مع **Xcode** كاملًا و **CocoaPods**
+- Android SDK (platform-tools + android-36 + build-tools; minSdk 23+)
+- To build iOS: a Mac with full **Xcode** and **CocoaPods**
 
 ---
 
-## ربط Firebase
+## Firebase setup
 
-المشروع مرتبط بمشروع Firebase الحالي **butula** (`project_id: butula-bcf9d`)، ويستخدم **Cloud Firestore + Auth فقط**.
+The app is linked to the existing Firebase project **butula**
+(`project_id: butula-bcf9d`) and uses **Cloud Firestore + Auth only**.
 
-ملفّا الإعداد موضوعان في أماكنهما الصحيحة مسبقًا:
+Both config files are already in place:
 
 - `android/app/google-services.json`
 - `ios/Runner/GoogleService-Info.plist`
 
-خطوات التفعيل في وحدة تحكّم Firebase:
+Steps in the Firebase console:
 
-1. فعّل **Authentication → Sign-in method → Email/Password**.
-2. فعّل **Cloud Firestore** (Native mode).
-3. انشر قواعد الأمان من الملف `firestore.rules`:
+1. Enable **Authentication → Sign-in method → Email/Password**.
+2. Enable **Cloud Firestore** (Native mode).
+3. Deploy the security rules from `firestore.rules`:
    ```bash
    firebase deploy --only firestore:rules
    ```
-   أو انسخ محتوى `firestore.rules` يدويًا في Firestore → Rules.
+   Chat, championships, and the version gate will NOT work until this runs.
 
-> ملاحظة: التطبيق لا يستخدم Realtime Database إطلاقًا — Firestore فقط.
+> Note: the app never uses Realtime Database — Cloud Firestore only.
 
-### بنية Firestore
+### Firestore structure
 
 ```
-users/{uid}                      { name, email, timezone, createdAt }
+users/{uid}                      { name, email, timezone, createdAt, chatLastReadAt, lastSettledAppDay }
 users/{uid}/habits/{habitId}     { name, emoji, iconCodePoint, points, type, schedule,
-                                   reminderEnabled, reminderTime, isPrivate, order, subItems }
+                                   reminderEnabled, reminderTime, isPrivate, order, subItems, deleted }
 users/{uid}/logs/{YYYY-MM-DD}    { <habitKey>: true/false, ..., editedLater }
 users/{uid}/reports/{YYYY-MM-DD} { answers, totalPoints, submittedAt, editCount }
-leaderboard/{uid}                { name, totalPoints, lastReportPoints, lastReportDate,
-                                   streak, monthPoints, monthKey }
+users/{uid}/qadaa/{autoId}       { prayerKey, missedDate, madeUpDate }
+users/{uid}/commitment/main      { text, createdAt, updatedAt }
+championships/{YYYY-MM}           { month }                       // marker
+championships/{YYYY-MM}/entries/{uid} { name, points, streak }
+chat/{autoId}                    { senderUid, senderName, text, sentAt }
+app_config/version               { latestBuild, apkUrl, required } // read-only
 ```
 
-العناصر الخاصة (بدون نقاط) تبقى داخل `users/{uid}/habits` ولا تخرج من نطاق المستخدم إطلاقًا.
+Private items and the commitment document live under `users/{uid}` and never
+leave the user's own subtree.
 
 ---
 
-## أوامر البناء والتشغيل
+## Build & run
 
 ```bash
-# تثبيت الحزم
 flutter pub get
-
-# فحص الكود
 flutter analyze
-
-# تشغيل الاختبارات
 flutter test
-
-# تشغيل على جهاز/محاكي
 flutter run
 
-# بناء APK للتثبيت المباشر على أندرويد
+# Release APK for direct Android install
 flutter build apk --release
-# الناتج: build/app/outputs/flutter-apk/app-release.apk
+# Output: build/app/outputs/flutter-apk/app-release.apk
 
-# التحقق من أن كود iOS يُبنى (بدون توقيع)
+# Verify the iOS code compiles (no signing needed)
 flutter build ios --no-codesign
 ```
 
-### تثبيت الـ APK على الهاتف
+Prefer the **Shorebird** release command above for the APK you actually
+distribute, so future Dart fixes can be patched over the air.
 
-انسخ `build/app/outputs/flutter-apk/app-release.apk` إلى هاتفك وثبّته
-(فعّل "التثبيت من مصادر غير معروفة" عند الطلب).
+### App icon
+Launcher icons are generated from `app_icon.png` (1024×1024) via
+`flutter_launcher_icons` (Android adaptive icon with a `#1a472a` background +
+iOS icon set). To regenerate: `dart run flutter_launcher_icons`.
 
 ---
 
-## ما يتبقّى لنشر iOS لاحقًا
+## What's left for iOS distribution later
 
-الكود جاهز تمامًا لـ iOS (bundle id: `com.yousef.butula`، وأذونات الإشعارات، وPodfile مضبوط لـ iOS 13+).
-لإكمال النشر عند توفّر حساب Apple Developer المدفوع:
+The code is fully iOS-ready (bundle id `com.yousef.butula`, notification
+permissions, Podfile for iOS 13+, generated icon set). When you have a paid
+Apple Developer account:
 
-1. افتح `ios/Runner.xcworkspace` في Xcode على جهاز Mac.
-2. من **Signing & Capabilities** اختر فريق Apple Developer الخاص بك.
-3. شغّل مرة واحدة:
+1. Open `ios/Runner.xcworkspace` in Xcode on a Mac.
+2. Under **Signing & Capabilities**, pick your team.
+3. Run once:
    ```bash
    cd ios && pod install && cd ..
    flutter build ios --release
    ```
-4. أنشئ التطبيق في **App Store Connect** وارفعه عبر **TestFlight**.
-
-لا حاجة لعمل أيّ شيء من ذلك الآن — البنية جاهزة لإضافة ملفات التوقيع (provisioning profiles) عند الحاجة.
+4. Create the app in **App Store Connect** and upload via **TestFlight**.
 
 ---
 
-## بنية المشروع
+## Project structure
 
 ```
 lib/
-  main.dart                 # تهيئة Firebase والإشعارات وتشغيل التطبيق
-  app.dart                  # MaterialApp + الثيم + RTL
-  firebase_options.dart     # إعداد Firebase لأندرويد و iOS
-  core/                     # الثيم، النصوص (عربي/إنجليزي)، الأدوات، مزوّدات Riverpod
-  models/                   # AppUser, Habit, DailyLog, DailyReport, LeaderboardEntry
+  main.dart                 # Firebase + notifications init, app bootstrap
+  app.dart                  # MaterialApp + theme + RTL
+  firebase_options.dart     # Firebase config for Android & iOS
+  core/                     # theme, strings (Arabic/English), utils, Riverpod providers
+  models/                   # AppUser, Habit, DailyLog, DailyReport, QadaaEntry,
+                            #   ChampionshipEntry, ChatMessage, Commitment, AppVersionConfig
   services/                 # Auth, Firestore, Notifications
   features/
-    auth/                   # الدخول والتسجيل والمنطقة الزمنية
-    habits/                 # بناء العادات + قاعدة الـ100 + المنتقيات
-    logging/                # اليوم + التقويم + تعديل الأيام السابقة
-    report/                 # التقرير المعتمد + كشف التعارض
-    stats/                  # الرسوم البيانية والإحصائيات
-    leaderboard/            # المتصدرون
-    settings/               # الإعدادات
-    shell/                  # التوجيه + شريط التنقّل السفلي
+    auth/                   # login, sign-up, timezone
+    habits/                 # habit builder + 100-point rule + pickers
+    logging/                # today (with date bar) + calendar + past-day editing
+    report/                 # certified report + conflict detection
+    stats/                  # charts and statistics
+    championships/          # monthly championships + archive
+    commitment/             # private commitment document + PDF
+    chat/                   # group chat
+    qadaa/                  # missed-prayer tracking
+    update/                 # in-app version gate
+    settings/               # settings + data export
+    shell/                  # routing + bottom navigation
 ```
 
-## إدارة الحالة
+## State management
 
-Riverpod (`flutter_riverpod`) لكل الحالة، مع مستمعي Firestore الحيّين وتخزين مؤقّت محلّي
-يعمل دون اتصال (Firestore offline persistence مفعّل افتراضيًا على الجوال).
+Riverpod (`flutter_riverpod`) throughout, with live Firestore listeners and a
+local offline cache (Firestore offline persistence is enabled by default on
+mobile).
